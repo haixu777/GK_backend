@@ -8,15 +8,16 @@
     "start": "node ./app.js"
   },
   "dependencies": {
-    "express": "*",
+    "bcryptjs": "*",
+    "body-parser": "*",
+    "connect-history-api-fallback": "*",
     "cors": "*",
+    "express": "*",
+    "jsonwebtoken": "*",
     "passport": "*",
     "passport-jwt": "*",
-    "jsonwebtoken": "*",
-    "body-parser": "*",
     "sequelize": "*",
-    "bcryptjs": "*",
-    "connect-history-api-fallback": "*"
+    "sequelize-hierarchy": "^1.2.0"
   },
   "author": "",
   "license": "ISC"

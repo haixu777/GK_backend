@@ -2,9 +2,10 @@ const express = require('express')
 const Router = express.Router()
 
 const Events = require('../models/events')
-const Topic_1 = require('../models/events/topic_1')
-const Topic_2 = require('../models/events/topic_2')
+const Control = require('../models/control')
+const Sample = require('../models/sample')
 
+/*
 Router.post('/addEvent', (req, res, next) => {
   const newEvent = {
     event_name: req.body.event_name,
@@ -23,52 +24,89 @@ Router.post('/addEvent', (req, res, next) => {
     })
   })
 })
+*/
 
-Router.get('/getTree', (req, res, next) => {
+Router.post('/update', (req, res, next) => {
+  const newEvent = {
+    id: req.body.id,
+    name: req.body.name,
+    descript: req.body.descript,
+    level: req.body.level,
+    type: req.body.type,
+    parent_id: req.body.parent_id,
+    harm_level: req.body.harm_level,
+    occurrence_time: new Date(req.body.occurrence_time).getTime(),
+    edit_time: req.body.edit_time
+  }
+  Events.addEvent(newEvent, (err, newEvent) => {
+    if (err) throw err
+    res.json({
+      success: true
+    })
+  })
+})
+
+Router.get('/tree', (req, res, next) => {
   Events.getTree((err, tree) => {
+    if (err) throw err
     res.json({
       tree: tree
     })
   })
 })
 
-Router.post('/update', (req, res, next) => {
-  if (req.body.hasOwnProperty('topic1_id')) {
-    req.body.id = req.body.topic1_id
-    Topic_1.updateTopic(req.body, (err, topic) => {
-      if (err) throw err
-      res.json({
-        success: true,
-        msg: 'update topic_1 succeed!',
-        info: topic
-      })
-    })
-  } else if (req.body.hasOwnProperty('topic2_id')) {
-    req.body.id = req.body.topic2_id
-    Topic_2.updateTopic(req.body, (err, topic) => {
-      if (err) throw err
-      res.json({
-        success: true,
-        msg: 'update topic_2 succeed!',
-        info: topic
-      })
-    })
-  } else if (req.body.hasOwnProperty('event_id')) {
-    req.body.id = req.body.event_id
-    Events.updateEvent(req.body, (err, events) => {
-      if (err) throw err
-      res.json({
-        success: true,
-        msg: 'update event succeed!',
-        info: events
-      })
-    })
-  } else if (req.body.hasOwnProperty('mainTopic_id')) {
+Router.post('/del', (req, res, next) => {
+  Events.delEvents(req.body.id, (err, events) => {
+    if (err) throw err
     res.json({
-      success: false,
-      msg: 'cannot change anything with main_topic!!'
+      success: true,
+      events: events
     })
-  }
+  })
+})
+
+Router.get('/list', (req, res, next) => {
+  let month = req.query.month
+  Events.getEventList(month,(err, eventList) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      eventList: eventList
+    })
+  })
+})
+
+Router.get('/fetchEventControl', (req, res, next) => {
+  let eventId = req.query.id
+  Control.getControlByEvent(eventId, (err, controlList) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      controlList: controlList
+    })
+  })
+})
+
+Router.get('/fetchEventSample', (req, res, next) => {
+  let eventId = req.query.id
+  Sample.getSampleByEvent(eventId, (err, sampleList) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      sampleList: sampleList
+    })
+  })
+})
+
+Router.get('/fetchEventByMonth', (req, res, next) => {
+  let month = req.query.month
+  Events.getEventByMonth(month, (err, eventsList) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      eventsList: eventsList
+    })
+  })
 })
 
 module.exports = Router

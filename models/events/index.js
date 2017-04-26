@@ -1,8 +1,7 @@
 const Sequelize = require('sequelize')
 const db = require('../../config/database')
 
-const Topic_1 = require('./topic_1')
-const Topic_2 = require('./topic_2')
+const $utils = require('../../utils')
 
 const Events = db.define('events', {
   id: {
@@ -11,25 +10,29 @@ const Events = db.define('events', {
   },
   name: Sequelize.STRING,
   descript: Sequelize.STRING,
-  topic1_id: {
-    type: Sequelize.UUID
+  parent_id: {
+    type: Sequelize.UUID,
+    hierarchy: true
   },
-  topic2_id: Sequelize.UUID,
   harm_level: Sequelize.STRING,
-  occurrence_time: Sequelize.DATE,
-  forensic_date: Sequelize.DATE
+  level: Sequelize.STRING,
+  type: Sequelize.STRING,
+  occurrence_time: Sequelize.STRING,
+  edit_time: Sequelize.STRING
 }, {
   freezeTableName: true,
   underscored: true
+  // hierarchy: true
 })
 
-Events.belongsTo(Topic_2)
-Topic_2.hasMany(Events)
-Topic_2.belongsTo(Topic_1)
-Topic_1.hasMany(Topic_2)
+Events.isHierarchy()
+
+// Events.hasMany(Events)
+// Events.belongsTo(Events)
 
 module.exports = Events
 
+/*
 module.exports.addEvent = function (newEvent, cb) {
   const dbEvent = Events.build(newEvent)
   dbEvent.save().then((events) => {
@@ -38,58 +41,100 @@ module.exports.addEvent = function (newEvent, cb) {
     cb(err, null)
   })
 }
+*/
+
+module.exports.addEvent = function (newEvent, cb) {
+  if(newEvent.id == null){
+    const dbEvent = Events.build(newEvent)
+    dbEvent.save().then((events) => {
+      cb(null, events)
+    }).catch((err) => {
+      cb(err, null)
+    })
+  }
+  else{
+    Events.update(
+    {
+      name: newEvent.name,
+      descript: newEvent.descript,
+      level: newEvent.level,
+      type: newEvent.type,
+      parent_id: newEvent.parent_id,
+      // occurrence_time: newEvent.occurrence_time,
+      // edit_time: newEvent.edit_time,
+      harm_level: newEvent.harm_level
+    },
+    {
+      where: {
+        id: newEvent.id
+      }
+    }
+  ).then((events) => {
+    cb(null, events)
+  }).catch((err) => {
+    cb(err, false)
+  })
+  }
+}
 
 module.exports.getTree = function (cb) {
-  Topic_1.findAll({
-    include: [
-      {
-        model: Topic_2,
-        include: [
-          {
-            model: Events
-          }
-        ]
-      }
-    ]
+  Events.findAll({
+    hierarchy: true
   }).then((tree) => {
     const resObj = tree.map(topic1 => {
       return Object.assign(
         {},
         {
-          topic1_id: topic1.id,
+          id: topic1.id,
           name: topic1.name,
+          parent_id: topic1.parent_id,
           descript: topic1.descript,
-          harm_level: topic1.harm_level,
-          children: topic1.topic2s.map(topic2 => {
+          occurrence_time: topic1.occurrence_time,
+          edit_time: topic1.edit_time,
+          level: topic1.level,
+          type: Number(topic1.type),
+          harm_level: Number(topic1.harm_level),
+          disabled: topic1.type === 1,
+          children: topic1.children ? topic1.children.map(topic2 => {
             return Object.assign(
               {},
               {
-                topic2_id: topic2.id,
+                id: topic2.id,
                 name: topic2.name,
+                parent_id: topic2.parent_id,
                 descript: topic2.descript,
-                harm_level: topic2.harm_level,
-                children: topic2.events.map(event => {
+                occurrence_time: topic2.occurrence_time,
+                edit_time: topic2.edit_time,
+                level: topic2.level,
+                type: Number(topic2.type),
+                harm_level: Number(topic2.harm_level),
+                disabled: topic2.type === 1,
+                children: topic2.children ? topic2.children.map(events => {
                   return Object.assign(
                     {},
                     {
-                      event_id: event.id,
-                      name: event.name,
-                      descript: event.descript,
-                      harm_level: event.harm_level,
-                      occurrence_time: event.occurrence_time,
-                      forensic_date: event.forensic_date
+                      id: events.id,
+                      name: events.name,
+                      parent_id: events.parent_id,
+                      descript: events.descript,
+                      occurrence_time: events.occurrence_time,
+                      edit_time: events.edit_time,
+                      level: events.level,
+                      type: Number(events.type),
+                      harm_level: Number(events.harm_level),
+                      disabled: events.type === 1
                     }
                   )
-                })
+                }) : []
               }
             )
-          })
+          }) : []
         }
       )
     })
-    cb(false, resObj)
+    cb(null, resObj)
   }).catch((err) => {
-    cb(err, null)
+    cb(err, false)
   })
 }
 
@@ -107,6 +152,84 @@ module.exports.updateEvent = function(body, cb) {
     }
   ).then((events) => {
     cb(null, events)
+  }).catch((err) => {
+    cb(err, false)
+  })
+}
+
+module.exports.delEvents = function(id, cb) {
+}
+
+module.exports.getEventList = function(month, cb) {
+  let toDou_month = month < 10 ? ('0' + month) : month
+  Events.findAll({
+    attributes: [
+      'id', 'name', 'descript', 'parent_id', 'harm_level', 'level', 'occurrence_time', 'edit_time',
+      [Sequelize.fn('date_format', Sequelize.col('occurrence_time'), '%m'), 'month']
+    ],
+    where: {
+      type: 1
+    }
+  }).then((eventList) => {
+    const arr = []
+    eventList.forEach((item) => {
+      if (item.get('month') === toDou_month) {
+        arr.push({
+          id: item.id,
+          name: item.name,
+          descript: item.descript,
+          parent_id: item.parent_id,
+          harm_level: item.harm_level,
+          level: item.level,
+          date: (item.occurrence_time).getDate(),
+          occurrence_time: item.occurrence_time.toLocaleString(),
+          edit_time: item.edit_time
+        })
+      }
+    })
+    /*
+    const resObj = eventList.map(item => {
+      return Object.assign(
+        {},
+        {
+          id: item.id,
+          name: item.name,
+          descript: item.descript,
+          parent_id: item.parent_id,
+          harm_level: item.harm_level,
+          level: item.level,
+          date: (item.occurrence_time).getDate(),
+          occurrence_time: item.occurrence_time.toLocaleString(),
+          edit_time: item.edit_time
+        }
+      )
+    })
+    */
+    cb(null, arr)
+  }).catch((err) => {
+    cb(err, false)
+  })
+}
+
+module.exports.getEventByMonth = function(month, cb) {
+  Events.findAll({
+    attributes: [
+      'id', 'name', 'occurrence_time',
+      [Sequelize.fn('date_format', Sequelize.col('occurrence_time'), '%m'), 'month']
+    ]
+  }).then((eventsList) => {
+    const resObj = eventsList.map(events => {
+      return Object.assign(
+        {},
+        {
+          id: events.id,
+          title: events.name,
+          start: $utils.formatCalendarDate(events.occurrence_time),
+          month: events.get('month')
+        }
+      )
+    })
+    cb(null, resObj)
   }).catch((err) => {
     cb(err, false)
   })
