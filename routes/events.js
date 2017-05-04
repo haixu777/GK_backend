@@ -99,12 +99,37 @@ Router.get('/fetchEventSample', (req, res, next) => {
 })
 
 Router.get('/fetchEventByMonth', (req, res, next) => {
-  let month = req.query.month
-  Events.getEventByMonth(month, (err, eventsList) => {
+  let queryObj = {
+    recurrence: Number(req.query.recurrence),
+    view: Number(req.query.view)
+  }
+  Events.getEventByMonth(queryObj, (err, eventsList) => {
     if (err) throw err
     res.json({
       success: true,
       eventsList: eventsList
+    })
+  })
+})
+
+Router.get('/timeline', (req, res, next) => {
+  let eventId = req.query.eventId
+  Control.getTimelineByEventId(eventId, (err, timeline) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      timeline: timeline
+    })
+  })
+})
+
+Router.get('/notice', (req, res, next) => {
+  let now = new Date()
+  Events.getNotice(now, (err, noticeList) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      noticeList: noticeList
     })
   })
 })

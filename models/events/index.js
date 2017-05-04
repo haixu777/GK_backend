@@ -18,6 +18,8 @@ const Events = db.define('events', {
   level: Sequelize.STRING,
   type: Sequelize.STRING,
   occurrence_time: Sequelize.STRING,
+  control_start_time: Sequelize.TIME,
+  control_end_time: Sequelize.TIME,
   edit_time: Sequelize.STRING
 }, {
   freezeTableName: true,
@@ -211,12 +213,19 @@ module.exports.getEventList = function(month, cb) {
   })
 }
 
-module.exports.getEventByMonth = function(month, cb) {
+module.exports.getEventByMonth = function(queryObj, cb) {
+  let recurrence = {}
+  console.log(queryObj)
+  if (queryObj.recurrence) {
+    recurrence.recurrence = 1
+  }
+  recurrence.type = 1
   Events.findAll({
     attributes: [
-      'id', 'name', 'occurrence_time',
+      'id', 'name', 'occurrence_time', 'descript', 'control_start_time', 'control_end_time',
       [Sequelize.fn('date_format', Sequelize.col('occurrence_time'), '%m'), 'month']
-    ]
+    ],
+    where: recurrence
   }).then((eventsList) => {
     const resObj = eventsList.map(events => {
       return Object.assign(
@@ -224,8 +233,46 @@ module.exports.getEventByMonth = function(month, cb) {
         {
           id: events.id,
           title: events.name,
-          start: $utils.formatCalendarDate(events.occurrence_time),
-          month: events.get('month')
+          start: $utils.formatCalendarDate(events.control_start_time),
+          end: queryObj.view ? $utils.formatCalendarDate(events.control_end_time) : '',
+          month: events.get('month'),
+          cssClass: 'month_color',
+          descript: events.descript
+        }
+      )
+    })
+    return cb(null, resObj)
+  }).catch((err) => {
+    cb(err, false)
+  })
+}
+
+module.exports.getNotice = function(now, cb) {
+  Events.findAll({
+    where: {
+      control_start_time: { lte: now },
+      control_end_time: { gte: now }
+    }
+  }).then((noticeList) => {
+    cb(null, noticeList)
+  }).catch((err) => {
+    cb(err, false)
+  })
+}
+
+module.exports.fetchEventListForControl = function(cb) {
+  Events.findAll({
+    where: {
+      type: 1
+    },
+    attributes: ['id', 'name']
+  }).then((eventList) => {
+    const resObj = eventList.map((item) => {
+      return Object.assign(
+        {},
+        {
+          value: item.id,
+          label: item.name
         }
       )
     })

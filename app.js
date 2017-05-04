@@ -7,6 +7,7 @@ const path = require('path')
 
 const User = require('./routes/user')
 const Events = require('./routes/events')
+const Control = require('./routes/control')
 
 const app = express()
 app.use(cors())
@@ -22,6 +23,7 @@ require('./config/passport')(passport)
 
 app.use('/user', User)
 app.use('/events', Events)
+app.use('/control', Control)
 
 const port = 3000
 
