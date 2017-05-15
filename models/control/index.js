@@ -3,6 +3,7 @@ const db = require('../../config/database')
 const $utils = require('../../utils')
 
 const Events = require('../events')
+// const Auto_control = require('./auto_results')
 
 const Control = db.define('control_programs', {
   id: {
@@ -15,7 +16,9 @@ const Control = db.define('control_programs', {
   control_descript: Sequelize.STRING,
   control_number: Sequelize.INTEGER,
   sample_type: Sequelize.STRING,
-  event_id: Sequelize.INTEGER
+  event_id: Sequelize.INTEGER,
+  auto_id: Sequelize.INTEGER,
+  verify: Sequelize.INTEGER
 }, {
   freezeTableName: true,
   underscored: true
@@ -94,7 +97,8 @@ module.exports.getList = function(conditionObj ,cb) {
               sample_type: item.sample_type,
               control_number: item.control_number,
               event: item.event.name,
-              event_id: item.event_id
+              event_id: item.event_id,
+              verify: item.verify
             }
           )
         }),
@@ -127,4 +131,66 @@ module.exports.updateControlToServer = function(control_item, cb) {
   }).catch((err) => {
     cb(err, false)
   })
+}
+
+module.exports.del = function(control_id, cb) {
+  Control.destroy({
+    where: {
+      id: control_id
+    }
+  }).then((control) => {
+    cb(null, '删除成功!')
+  }).catch((err) => {
+    cb(err, false)
+  })
+}
+
+module.exports.verify = function(id, verify, cb) {
+  if (verify) {
+    Control.update(
+      {
+        verify: verify
+      },
+      {
+        where: {
+          id: id
+        }
+      }
+    ).then((res) => {
+      cb(null, '审核通过!')
+    }).catch((err) => {
+      cb(err, false)
+    })
+  } else {
+    Control.findById(id).then((item) => {
+      require('./auto_results').update(
+        {
+          check: 0
+        },
+        {
+          where: {
+            id: item.auto_id
+          }
+        }
+      ).then((res) => {
+        Control.destroy({
+          where: {
+            id: id
+          }
+        }).then((res) => {
+          cb(null, '审核拒绝')
+        }).catch((err) => {
+          cb(err, false)
+        })
+      }).catch((err) => {
+        cb(err, false)
+      })
+    }).catch((err) => {
+      cb(err, false)
+    })
+  }
+}
+
+module.exports.uploadFile = function(file, cb) {
+  cb(null, 'file')
 }

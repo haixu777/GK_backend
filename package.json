@@ -13,6 +13,7 @@
     "connect-history-api-fallback": "*",
     "cors": "*",
     "express": "*",
+    "formidable": "^1.1.1",
     "jsonwebtoken": "*",
     "passport": "*",
     "passport-jwt": "*",

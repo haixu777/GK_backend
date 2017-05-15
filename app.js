@@ -8,8 +8,12 @@ const path = require('path')
 const User = require('./routes/user')
 const Events = require('./routes/events')
 const Control = require('./routes/control')
+const Sample = require('./routes/sample')
 
 const app = express()
+
+app.disable('x-powered-by')
+
 app.use(cors())
 // app.use(history())
 
@@ -22,6 +26,7 @@ app.use(passport.session())
 require('./config/passport')(passport)
 
 app.use('/user', User)
+app.use('/sample', Sample)
 app.use('/events', Events)
 app.use('/control', Control)
 

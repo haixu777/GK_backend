@@ -272,7 +272,7 @@ module.exports.fetchEventListForControl = function(cb) {
         {},
         {
           value: item.id,
-          label: item.name
+          text: item.name
         }
       )
     })
