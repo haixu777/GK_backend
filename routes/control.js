@@ -105,7 +105,14 @@ Router.post('/confirmCheck', (req, res, next) => {
     {},
     {
       id: req.body.auto_id,
-      check: req.body.check
+      check: req.body.check,
+      descript: req.body.descript,
+      number: req.body.number,
+      range: req.body.range,
+      time: new Date(req.body.time),
+      event: req.body.event,
+      eventId: req.body.eventId,
+      sample_type: req.body.sample_type
     }
   )
   Control_auto.confirmCheck(reqObj, (err, msg) => {

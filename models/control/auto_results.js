@@ -78,7 +78,13 @@ module.exports.getList = function(conditionObj ,cb) {
 module.exports.confirmCheck = function(reqObj, cb) {
   Control_auto.update(
     {
-      check: 1
+      check: 1,
+      control_descript: reqObj.descript,
+      control_number: reqObj.number,
+      control_range: reqObj.range,
+      control_time: reqObj.time,
+      event_id: reqObj.eventId,
+      sample_type: reqObj.sample_type
     },
     {
       where: {
