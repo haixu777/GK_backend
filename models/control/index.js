@@ -73,6 +73,13 @@ module.exports.getList = function(conditionObj ,cb) {
     limit: conditionObj.perItem,
     offset: conditionObj.currentPage * conditionObj.perItem,
     where: {
+      // control_time: {
+      //   lte: conditionObj.time_end,
+      //   gte: conditionObj.time_start
+      // },
+      control_time: conditionObj.time_start ? { lte: conditionObj.time_end, gte: conditionObj.time_start } : { $ne: null },
+      event_id: conditionObj.event_id ? conditionObj.event_id : { $ne: null },
+      verify: (conditionObj.verify === -1) ? ({ $ne: null }) : (conditionObj.verify)
     },
     include: {
       model: Events,
@@ -94,6 +101,7 @@ module.exports.getList = function(conditionObj ,cb) {
               control_descript: item.control_descript,
               control_range: item.control_range,
               control_time: $utils.formatTime(item.control_time),
+              control_operation: item.control_operation,
               sample_type: item.sample_type,
               control_number: item.control_number,
               event: item.event.name,
@@ -118,6 +126,7 @@ module.exports.updateControlToServer = function(control_item, cb) {
       control_number: control_item.number,
       control_range: control_item.range,
       control_time: control_item.time,
+      control_operation: control_item.operation,
       sample_type: control_item.sample_type,
       event_id: control_item.eventId
     },

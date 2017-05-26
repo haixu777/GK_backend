@@ -1,5 +1,19 @@
 const express = require('express')
 const Router = express.Router()
+const exec = require('child-process-promise').exec
+
+const multer = require('multer')
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'upload/')
+  },
+  filename: function (req, file, cb) {
+    // console.log(file)
+    cb(null, file.originalname)
+  }
+})
+
+var upload = multer({ storage: storage }).array('file')
 
 const Events = require('../models/events')
 const Sample = require('../models/sample')
@@ -42,5 +56,34 @@ Router.post('/del', (req, res, next) => {
     })
   })
 })
+
+Router.post('/upload', (req, res, next) => {
+  upload(req, res, (err) => {
+    if (err) throw err
+    exec('curl http://localost:3000/control/fetchEventListForControl')
+      .then((res) => {
+        let resObj = JSON.parse(res.stdout)
+        console.log(resObj.success)
+      }).catch((err) => {
+        console.log(err)
+      })
+    res.json({
+      success: true
+    })
+  })
+})
+
+function run(cmd, file){
+  var spawn = require('child_process').spawn
+  var command = spawn(cmd, file)
+  var result = ''
+  command.stdout.on('data', function(data) {
+    result += data.toString()
+  })
+  command.on('close', function(code) {
+    console.log(result)
+    return result
+  })
+}
 
 module.exports = Router

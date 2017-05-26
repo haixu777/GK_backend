@@ -62,7 +62,8 @@ module.exports.getList = function(conditionObj ,cb) {
               control_number: item.control_number,
               event: item.event.name,
               event_id: item.event_id,
-              check: item.check
+              check: item.check,
+              operation: item.control_operation
             }
           )
         }),
@@ -83,6 +84,7 @@ module.exports.confirmCheck = function(reqObj, cb) {
       control_number: reqObj.number,
       control_range: reqObj.range,
       control_time: reqObj.time,
+      control_operation: reqObj.operation,
       event_id: reqObj.eventId,
       sample_type: reqObj.sample_type
     },
@@ -125,6 +127,49 @@ module.exports.del = function(id, cb) {
     }
   }).then((control) => {
     cb(null, '删除成功!')
+  }).catch((err) => {
+    cb(err, false)
+  })
+}
+
+module.exports.addAuto = function(reqObj, cb) {
+  let db_item = Control_auto.build({
+    control_time: reqObj.time,
+    control_range: reqObj.range,
+    control_operation: reqObj.operation,
+    control_descript: reqObj.descript,
+    control_number: reqObj.number,
+    sample_type: reqObj.type,
+    event_id: reqObj.eventId,
+    check: 0
+  })
+  db_item.save()
+    .then((res) => {
+      cb(null, '添加管控记录成功!')
+    }).catch((err) => {
+      cb(err, false)
+    })
+}
+
+module.exports._update = function(reqObj, cb) {
+  console.log(reqObj.id)
+  Control_auto.update(
+    {
+      control_time: reqObj.time,
+      control_range: reqObj.range,
+      control_operation: reqObj.operation,
+      control_descript: reqObj.descript,
+      control_number: reqObj.number,
+      sample_type: reqObj.sample_type,
+      event_id: reqObj.eventId,
+    },
+    {
+      where: {
+        id: reqObj.id
+      }
+    }
+  ).then((res) => {
+    cb(null, res)
   }).catch((err) => {
     cb(err, false)
   })

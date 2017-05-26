@@ -31,17 +31,20 @@ Router.post('/update', (req, res, next) => {
     id: req.body.id,
     name: req.body.name,
     descript: req.body.descript,
-    level: req.body.level,
-    type: req.body.type,
-    parent_id: req.body.parent_id,
+    level: req.body.level.join(),
+    type: Number(req.body.type),
+    parent_id: req.body.level[req.body.level.length - 1],
     harm_level: req.body.harm_level,
-    occurrence_time: new Date(req.body.occurrence_time).getTime(),
-    edit_time: req.body.edit_time
+    occurrence_time: req.body.occurrence_time,
+    edit_time: req.body.edit_time,
+    recurrence: req.body.recurrence,
+    alertRange: req.body.alertRange
   }
-  Events.addEvent(newEvent, (err, newEvent) => {
+  Events.addEvent(newEvent, (err, new_event) => {
     if (err) throw err
     res.json({
-      success: true
+      success: true,
+      msg: newEvent.id ? (`事件: ${req.body.name}, 更新成功!`) : (`事件: ${req.body.name}, 添加成功!`)
     })
   })
 })

@@ -13,7 +13,11 @@ Router.get('/fetchList', (req, res, next) => {
       perItem: Number(req.query.perItem),
       currentPage: Number(req.query.currentPage),
       sort_key: req.query.sort_key,
-      sort_order: req.query.sort_order
+      sort_order: req.query.sort_order,
+      time_start: req.query.time_start,
+      time_end: req.query.time_end,
+      event_id: req.query.event_id,
+      verify: Number(req.query.verify)
     }
   )
   Control.getList(condition ,(err, resObj) => {
@@ -65,6 +69,7 @@ Router.post('/updateControl', (req, res, next) => {
       eventId: req.body.eventId,
       number: req.body.number,
       range: req.body.range,
+      operation: req.body.operation,
       sample_type: req.body.sample_type,
       time: req.body.time
     }
@@ -109,6 +114,7 @@ Router.post('/confirmCheck', (req, res, next) => {
       descript: req.body.descript,
       number: req.body.number,
       range: req.body.range,
+      operation: req.body.operation,
       time: new Date(req.body.time),
       event: req.body.event,
       eventId: req.body.eventId,
@@ -137,6 +143,51 @@ Router.post('/handleVerify', (req, res, next) => {
 Router.post('/uploadFile', (req, res, next) => {
   res.json({
     success: true
+  })
+})
+
+Router.post('/add', (req, res, next) => {
+  let reqObj = Object.assign(
+    {},
+    {
+      descript: req.body.descript,
+      number: req.body.number,
+      range: req.body.range,
+      operation: req.body.operation,
+      time: new Date(req.body.time),
+      eventId: req.body.eventId,
+      sample_type: req.body.sample_type
+    }
+  )
+  Control_auto.addAuto(reqObj, (err, msg) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      msg: msg
+    })
+  })
+})
+
+Router.post('/auto_update', (req, res, next) => {
+  let reqObj = Object.assign(
+    {},
+    {
+      id: req.body.id,
+      descript: req.body.descript,
+      number: req.body.number,
+      range: req.body.range,
+      operation: req.body.operation,
+      time: new Date(req.body.time),
+      eventId: req.body.eventId,
+      sample_type: req.body.sample_type
+    }
+  )
+  Control_auto._update(reqObj, (err, msg) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      msg: '记录更新成功!'
+    })
   })
 })
 
