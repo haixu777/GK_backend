@@ -90,4 +90,32 @@ function run(cmd, file){
   })
 }
 
+// ------------- samples_auto ---------------
+Router.get('/fetchAutoList', (req, res, next) => {
+  let reqObj = Object.assign(
+    {},
+    {
+      perItem: Number(req.query.perItem),
+      currentPage: Number(req.query.currentPage),
+      sort_key: req.query.sort_key,
+      sort_order: req.query.sort_order
+    }
+  )
+  Sample_auto.getList(reqObj, (err, sampleList) => {
+    res.json({
+      success: true,
+      data: sampleList
+    })
+  })
+})
+
+Router.get('/autoIsExist', (req, res, next) => {
+  Sample_auto.isExist(req.query.name, (err, isExist) => {
+    res.json({
+      success: true,
+      isExist: isExist
+    })
+  })
+})
+
 module.exports = Router
