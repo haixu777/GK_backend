@@ -17,6 +17,7 @@ var upload = multer({ storage: storage }).array('file')
 
 const Events = require('../models/events')
 const Sample = require('../models/sample')
+const Sample_auto =require('../models/sample/auto_results')
 
 Router.get('/fetchList', (req, res, next) => {
   let reqObj = Object.assign(
@@ -60,15 +61,18 @@ Router.post('/del', (req, res, next) => {
 Router.post('/upload', (req, res, next) => {
   upload(req, res, (err) => {
     if (err) throw err
-    exec('curl http://localost:3000/control/fetchEventListForControl')
-      .then((res) => {
-        let resObj = JSON.parse(res.stdout)
-        console.log(resObj.success)
-      }).catch((err) => {
-        console.log(err)
+    let sample = Object.assign(
+      {},
+      {
+        name: req.files[0].filename,
+        path: req.files[0].path
+      }
+    )
+    Sample_auto.upload(sample, (err, msg) => {
+      res.json({
+        success: true,
+        msg: msg
       })
-    res.json({
-      success: true
     })
   })
 })
