@@ -8,7 +8,6 @@ const storage = multer.diskStorage({
     cb(null, 'upload/')
   },
   filename: function (req, file, cb) {
-    // console.log(file)
     cb(null, file.originalname)
   }
 })
@@ -109,6 +108,23 @@ Router.get('/fetchAutoList', (req, res, next) => {
   })
 })
 
+Router.post('/autoDel', (req, res, next) => {
+  Sample_auto.del(req.body.id, (err, msg) => {
+    if (err) throw err
+    exec(`rm ${req.body.path}`).then(() => {
+      res.json({
+        success: true,
+        msg: msg
+      })
+    }).catch((err) => {
+      res.json({
+        success: false,
+        msg: err
+      })
+    })
+  })
+})
+
 Router.get('/autoIsExist', (req, res, next) => {
   Sample_auto.isExist(req.query.name, (err, isExist) => {
     res.json({
@@ -117,5 +133,6 @@ Router.get('/autoIsExist', (req, res, next) => {
     })
   })
 })
+
 
 module.exports = Router

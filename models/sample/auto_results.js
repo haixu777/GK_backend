@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize')
 const db = require('../../config/database')
+const $utils = require('../../utils')
 
 const Sample_auto = db.define('samples_auto', {
   id: {
@@ -36,7 +37,7 @@ module.exports.getList = function(reqObj, cb) {
               id: sample.id,
               path: sample.path,
               name: sample.name,
-              upload_date: sample.upload_date
+              upload_date: $utils.formatTime(sample.upload_date)
             }
           )
         }),
@@ -58,6 +59,18 @@ module.exports.upload = function(sample, cb) {
     cb(null, sample.name)
   }).catch((err) => {
     cb(err, false)
+  })
+}
+
+module.exports.del = function(id, cb) {
+  Sample_auto.destroy({
+    where: {
+      id: id
+    }
+  }).then(() => {
+    cb(null, '删除成功!')
+  }).catch((err) => {
+    cb(err, '删除失败')
   })
 }
 
