@@ -134,5 +134,19 @@ Router.get('/autoIsExist', (req, res, next) => {
   })
 })
 
+Router.get('/autoDownload', (req, res, next) => {
+  Sample_auto.findById(req.query.id)
+    .then((sample) => {
+      let filePath = sample.path
+      let fileName = sample.name
+      res.download(filePath, fileName)
+    }).catch((err) => {
+      res.json({
+        success: false,
+        msg: err
+      })
+    })
+})
+
 
 module.exports = Router
