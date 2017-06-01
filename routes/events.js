@@ -4,6 +4,7 @@ const Router = express.Router()
 const Events = require('../models/events')
 const Control = require('../models/control')
 const Sample = require('../models/sample')
+const Keywords = require('../models/keywords')
 
 /*
 Router.post('/addEvent', (req, res, next) => {
@@ -133,6 +134,17 @@ Router.get('/notice', (req, res, next) => {
     res.json({
       success: true,
       noticeList: noticeList
+    })
+  })
+})
+
+Router.get('/fetchkeywords', (req, res, next) => {
+  let eventId = req.query.eventId
+  Keywords.fetchByEventId(eventId, (err, keywordsList) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      keywordsList: keywordsList
     })
   })
 })
