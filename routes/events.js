@@ -5,6 +5,8 @@ const Events = require('../models/events')
 const Control = require('../models/control')
 const Sample = require('../models/sample')
 const Keywords = require('../models/keywords')
+const Persons = require('../models/person')
+const Platform = require('../models/platforms')
 
 /*
 Router.post('/addEvent', (req, res, next) => {
@@ -145,6 +147,26 @@ Router.get('/fetchkeywords', (req, res, next) => {
     res.json({
       success: true,
       keywordsList: keywordsList
+    })
+  })
+})
+
+Router.get('/fetchPersons', (req, res, next) => {
+  Persons.fetchByEventId(req.query.eventId, (err, personList) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      personList: personList
+    })
+  })
+})
+
+Router.get('/fetchPlatform', (req, res, next) => {
+  Platform.fetchByEventId(req.query.eventId, (err, platformList) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      platformList: platformList
     })
   })
 })

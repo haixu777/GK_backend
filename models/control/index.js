@@ -128,7 +128,8 @@ module.exports.updateControlToServer = function(control_item, cb) {
       control_time: control_item.time,
       control_operation: control_item.operation,
       sample_type: control_item.sample_type,
-      event_id: control_item.eventId
+      event_id: control_item.eventId,
+      verify: control_item.verify
     },
     {
       where: {
@@ -198,6 +199,25 @@ module.exports.verify = function(id, verify, cb) {
       cb(err, false)
     })
   }
+}
+
+module.exports.addItem = function(reqObj, cb) {
+  let db_item = Control.build({
+    control_time: reqObj.time,
+    control_range: reqObj.range,
+    control_operation: reqObj.operation,
+    control_descript: reqObj.descript,
+    control_number: reqObj.number,
+    sample_type: reqObj.type,
+    event_id: reqObj.eventId,
+    check: 0
+  })
+  db_item.save()
+    .then((res) => {
+      cb(null, '添加管控记录成功!')
+    }).catch((err) => {
+      cb(err, false)
+    })
 }
 
 module.exports.uploadFile = function(file, cb) {

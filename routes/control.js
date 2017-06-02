@@ -71,7 +71,8 @@ Router.post('/updateControl', (req, res, next) => {
       range: req.body.range,
       operation: req.body.operation,
       sample_type: req.body.sample_type,
-      time: req.body.time
+      time: req.body.time,
+      verify: req.body.verify
     }
   )
   Control.updateControlToServer(control_item, (err, msg) => {
@@ -159,7 +160,7 @@ Router.post('/add', (req, res, next) => {
       sample_type: req.body.sample_type
     }
   )
-  Control_auto.addAuto(reqObj, (err, msg) => {
+  Control.addItem(reqObj, (err, msg) => {
     if (err) throw err
     res.json({
       success: true,
