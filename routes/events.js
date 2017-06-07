@@ -8,6 +8,7 @@ const Keywords = require('../models/keywords')
 const Persons = require('../models/person')
 const Platform = require('../models/platforms')
 const Account = require('../models/account')
+const Group = require('../models/group')
 
 /*
 Router.post('/addEvent', (req, res, next) => {
@@ -178,6 +179,16 @@ Router.get('/fetchAccount', (req, res, next) => {
     res.json({
       success: true,
       accountList: accountList
+    })
+  })
+})
+
+Router.get('/fetchGroup', (req, res, next) => {
+  Group.fetchByEventId(req.query.eventId, (err, groupList) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      groupList: groupList
     })
   })
 })
