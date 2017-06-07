@@ -9,6 +9,7 @@ const User = require('./routes/user')
 const Events = require('./routes/events')
 const Control = require('./routes/control')
 const Sample = require('./routes/sample')
+const Group = require('./routes/group')
 
 const app = express()
 
@@ -29,6 +30,7 @@ app.use('/user', User)
 app.use('/sample', Sample)
 app.use('/events', Events)
 app.use('/control', Control)
+app.use('/group', Group)
 
 const port = 3000
 
