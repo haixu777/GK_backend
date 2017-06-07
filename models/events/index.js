@@ -186,6 +186,19 @@ module.exports.updateEvent = function(body, cb) {
 }
 
 module.exports.delEvents = function(id, cb) {
+  Events.findById(id)
+    .then((_event) => {
+      if (!_event) {
+        cb(null, null)
+      }
+      _event.destroy().then(() => {
+        cb(null, '事件：' + _event.name + ', 删除成功!')
+      }).catch((err) => {
+        cb(err, false)
+      })
+    }).catch((err) => {
+      cb(err, false)
+    })
 }
 
 module.exports.getEventList = function(month, cb) {

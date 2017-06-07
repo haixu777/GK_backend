@@ -63,11 +63,11 @@ Router.get('/tree', (req, res, next) => {
 })
 
 Router.post('/del', (req, res, next) => {
-  Events.delEvents(req.body.id, (err, events) => {
+  Events.delEvents(req.body.id, (err, msg) => {
     if (err) throw err
     res.json({
       success: true,
-      events: events
+      msg: msg
     })
   })
 })
