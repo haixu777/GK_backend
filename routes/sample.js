@@ -50,10 +50,19 @@ Router.post('/del', (req, res, next) => {
   let sample_id = req.body.id
   Sample.del(sample_id, (err, msg) => {
     if (err) throw err
-    res.json({
-      success: true,
-      info: msg
+
+    exec(`rm ${req.body.path}`).then(() => {
+      res.json({
+        success: true,
+        msg: msg
+      })
+    }).catch((err) => {
+      res.json({
+        success: false,
+        msg: err
+      })
     })
+
   })
 })
 
@@ -139,6 +148,20 @@ Router.get('/autoDownload', (req, res, next) => {
     .then((sample) => {
       let filePath = sample.path
       let fileName = sample.name
+      res.download(filePath, fileName)
+    }).catch((err) => {
+      res.json({
+        success: false,
+        msg: err
+      })
+    })
+})
+
+Router.get('/download', (req, res, next) => {
+  Sample.findById(req.query.id)
+    .then((sample) => {
+      let filePath = sample.sample_path
+      let fileName = sample.sample_path.split('/').pop()
       res.download(filePath, fileName)
     }).catch((err) => {
       res.json({

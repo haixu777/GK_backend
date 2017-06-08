@@ -302,7 +302,6 @@ module.exports.getNotice = function(now, cb) {
 module.exports.fetchEventListForControl = function(cb) {
   Events.findAll({
     where: {
-      type: 1
     },
     attributes: ['id', 'name']
   }).then((eventList) => {

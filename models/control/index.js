@@ -208,7 +208,7 @@ module.exports.addItem = function(reqObj, cb) {
     control_operation: reqObj.operation,
     control_descript: reqObj.descript,
     control_number: reqObj.number,
-    sample_type: reqObj.type,
+    sample_type: reqObj.sample_type,
     event_id: reqObj.eventId,
     check: 0
   })
