@@ -10,6 +10,7 @@ const Events = require('./routes/events')
 const Control = require('./routes/control')
 const Sample = require('./routes/sample')
 const Group = require('./routes/group')
+const Keywords = require('./routes/keywords')
 
 const app = express()
 
@@ -31,6 +32,7 @@ app.use('/sample', Sample)
 app.use('/events', Events)
 app.use('/control', Control)
 app.use('/group', Group)
+app.use('/keywords', Keywords)
 
 const port = 3000
 
