@@ -15,9 +15,8 @@ Router.get('/list', (req, res, next) => {
 
 Router.post('/event2keyword', (req, res, next) => {
   Keywords.event2keyword(req.body, (err, info) => {
-    if (err) throw err
     res.json({
-      success: true,
+      success: err ? false : true,
       msg: info
     })
   })

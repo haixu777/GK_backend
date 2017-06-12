@@ -104,15 +104,27 @@ module.exports.event2keyword = function (reqObj, cb) {
           name: reqObj.keyword
         }
       }).then((db_keyword) => {
+        console.log(db_keyword)
         if (db_keyword) {
-          let db_e2k = Event2Keyword.build({
-            keyword_id: db_keyword.id,
-            event_id: reqObj.eventId
-          })
-          db_e2k.save().then((res) => {
-            cb(null, `配置成功!`)
-          }).catch((err) => {
-            cb(err, false)
+          Event2Keyword.findOne({
+            where: {
+              event_id: reqObj.eventId,
+              keyword_id: db_keyword.id
+            }
+          }).then((db_e2k) => {
+            if (db_e2k) {
+              cb(true, '配置失败！关键词已配置')
+            } else {
+              let db_e2k = Event2Keyword.build({
+                keyword_id: db_keyword.id,
+                event_id: reqObj.eventId
+              })
+              db_e2k.save().then((res) => {
+                cb(null, `配置成功!`)
+              }).catch((err) => {
+                cb(err, false)
+              })
+            }
           })
         } else {
           let db_keyword = Keywords.build({
