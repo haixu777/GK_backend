@@ -254,7 +254,6 @@ module.exports.getEventList = function(month, cb) {
 
 module.exports.getEventByMonth = function(queryObj, cb) {
   let recurrence = {}
-  console.log(queryObj)
   if (queryObj.recurrence) {
     recurrence.recurrence = 1
   }
