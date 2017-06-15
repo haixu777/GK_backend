@@ -21,7 +21,8 @@ const Events = db.define('events', {
   control_start_time: Sequelize.DATE,
   control_end_time: Sequelize.DATE,
   edit_time: Sequelize.DATE,
-  recurrence: Sequelize.STRING
+  recurrence: Sequelize.STRING,
+  category: Sequelize.INTEGER
 }, {
   freezeTableName: true,
   underscored: true
@@ -253,7 +254,7 @@ module.exports.getEventList = function(month, cb) {
 }
 
 module.exports.getEventByMonth = function(queryObj, cb) {
-  let recurrence = {}
+  let recurrence = {category: 1}
   if (queryObj.recurrence) {
     recurrence.recurrence = 1
   }
@@ -286,10 +287,12 @@ module.exports.getEventByMonth = function(queryObj, cb) {
 }
 
 module.exports.getNotice = function(now, cb) {
+  let earlyDay = new Date(now.getTime() - (86400000 * 4))
+  let laterDay = new Date(now.getTime() + (86400000 * 4))
   Events.findAll({
     where: {
-      control_start_time: { lte: now },
-      control_end_time: { gte: now }
+      control_start_time: { lte: laterDay },
+      control_end_time: { gte: earlyDay }
     }
   }).then((noticeList) => {
     cb(null, noticeList)

@@ -49,6 +49,7 @@ module.exports.getList = function(reqObj, cb) {
     limit: reqObj.perItem,
     offset: reqObj.currentPage * reqObj.perItem,
     where: {
+      event_id: reqObj.eventId ? reqObj.eventId : { $ne: null },
     },
     include: {
       model: Events,
