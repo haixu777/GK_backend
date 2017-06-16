@@ -60,7 +60,8 @@ module.exports.addEvent = function (newEvent, cb) {
       edit_time: newEvent.edit_time,
       recurrence: newEvent.recurrence,
       control_start_time: newEvent.alertRange[0],
-      control_end_time: newEvent.alertRange[1]
+      control_end_time: newEvent.alertRange[1],
+      category: newEvent.category
     })
     dbEvent.save().then((events) => {
       cb(null, events)
@@ -85,7 +86,8 @@ module.exports.addEvent = function (newEvent, cb) {
       recurrence: newEvent.recurrence,
       harm_level: newEvent.harm_level,
       control_start_time: newEvent.alertRange[0],
-      control_end_time: newEvent.alertRange[1]
+      control_end_time: newEvent.alertRange[1],
+      category: newEvent.category
     },
     {
       where: {
@@ -120,6 +122,7 @@ module.exports.getTree = function (cb) {
           disabled: topic1.type === 1,
           recurrence: Number(topic1.recurrence),
           alertRange: [topic1.control_start_time, topic1.control_end_time],
+          category: topic1.category,
           children: topic1.children ? topic1.children.map(topic2 => {
             return Object.assign(
               {},
@@ -136,6 +139,7 @@ module.exports.getTree = function (cb) {
                 disabled: topic2.type === 1,
                 recurrence: Number(topic2.recurrence),
                 alertRange: [topic2.control_start_time, topic2.control_end_time],
+                category: topic2.category,
                 children: topic2.children ? topic2.children.map(events => {
                   return Object.assign(
                     {},
@@ -151,6 +155,7 @@ module.exports.getTree = function (cb) {
                       harm_level: Number(events.harm_level),
                       disabled: events.type === 1,
                       recurrence: Number(events.recurrence),
+                      category: events.category,
                       alertRange: [events.control_start_time, events.control_end_time]
                     }
                   )
@@ -258,7 +263,7 @@ module.exports.getEventByMonth = function(queryObj, cb) {
   if (queryObj.recurrence) {
     recurrence.recurrence = 1
   }
-  recurrence.type = 1
+  recurrence.category = 1
   Events.findAll({
     attributes: [
       'id', 'name', 'occurrence_time', 'descript', 'control_start_time', 'control_end_time',
@@ -292,7 +297,8 @@ module.exports.getNotice = function(now, cb) {
   Events.findAll({
     where: {
       control_start_time: { lte: laterDay },
-      control_end_time: { gte: earlyDay }
+      control_end_time: { gte: earlyDay },
+      category: 1
     }
   }).then((noticeList) => {
     cb(null, noticeList)

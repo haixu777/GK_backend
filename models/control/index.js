@@ -79,7 +79,7 @@ module.exports.getList = function(conditionObj ,cb) {
       // },
       control_time: conditionObj.time_start ? { lte: conditionObj.time_end, gte: conditionObj.time_start } : { $ne: null },
       event_id: conditionObj.event_id ? conditionObj.event_id : { $ne: null },
-      verify: (conditionObj.verify === -1) ? ({ $ne: null }) : (conditionObj.verify)
+      verify: (conditionObj.verify === '' || conditionObj.verify === '-1') ? ({ $ne: null }) : (conditionObj.verify)
     },
     include: {
       model: Events,

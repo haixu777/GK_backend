@@ -1,9 +1,10 @@
 const express = require('express')
+const router = express.Router()
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const passport = require('passport')
 const path = require('path')
-// const history = require('connect-history-api-fallback')
+const history = require('connect-history-api-fallback')
 
 const User = require('./routes/user')
 const Events = require('./routes/events')
@@ -17,7 +18,7 @@ const app = express()
 app.disable('x-powered-by')
 
 app.use(cors())
-// app.use(history())
+app.use(history())
 
 app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, 'public')))

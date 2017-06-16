@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize')
 const db = require('../../config/database')
 const $utils = require('../../utils')
+const autoSample = require('./auto_results')
 
 const Events = require('../events')
 
@@ -129,4 +130,35 @@ module.exports.del = function(sample_id, cb) {
   }).catch((err) => {
     cb(err, false)
   })
+}
+
+module.exports.extra = function(reqObj, cb) {
+  autoSample.findById(reqObj.sampleId)
+    .then((_autoSample) => {
+      let db_sample = Sample.build({
+        forensic_date: _autoSample.upload_date,
+        post: reqObj.post,
+        url: reqObj.url,
+        publish_platform: reqObj.platform,
+        publish_chanel: reqObj.chanel,
+        publish_time: reqObj.publish_time,
+        publish_account: reqObj.publish_account,
+        sample_title: _autoSample.name,
+        sample_content: reqObj.content,
+        sample_path: _autoSample.path,
+        sample_format: reqObj.format,
+        event_id: reqObj.eventId
+      })
+      db_sample.save().then(() => {
+        _autoSample.destroy().then(() => {
+          cb(null, `样本: ${reqObj.title}, 抽取成功！`)
+        }).catch((err) => {
+          cb(err, false)
+        })
+      }).catch((err) => {
+        cb(err, false)
+      })
+    }).catch((err) => {
+      cb(err, false)
+    })
 }

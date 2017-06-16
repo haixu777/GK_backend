@@ -43,7 +43,8 @@ Router.post('/update', (req, res, next) => {
     occurrence_time: req.body.occurrence_time,
     edit_time: req.body.edit_time,
     recurrence: req.body.recurrence,
-    alertRange: req.body.alertRange
+    alertRange: req.body.alertRange,
+    category: req.body.category
   }
   Events.addEvent(newEvent, (err, new_event) => {
     if (err) throw err

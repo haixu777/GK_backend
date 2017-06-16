@@ -17,7 +17,7 @@ Router.get('/fetchList', (req, res, next) => {
       time_start: req.query.time_start,
       time_end: req.query.time_end,
       event_id: req.query.event_id,
-      verify: Number(req.query.verify)
+      verify: req.query.verify
     }
   )
   Control.getList(condition ,(err, resObj) => {

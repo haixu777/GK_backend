@@ -67,6 +67,15 @@ Router.post('/del', (req, res, next) => {
   })
 })
 
+Router.post('/extra', (req, res, next) => {
+  Sample.extra(req.body, (err, msg) => {
+    res.json({
+      success: true,
+      info: msg
+    })
+  })
+})
+
 Router.post('/upload', (req, res, next) => {
   upload(req, res, (err) => {
     if (err) throw err
