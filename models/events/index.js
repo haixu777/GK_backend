@@ -291,6 +291,19 @@ module.exports.getEventByMonth = function(queryObj, cb) {
   })
 }
 
+module.exports.getEventByDay = function(reqObj, cb) {
+  Events.findAll({
+    where: Sequelize.and(
+      Sequelize.where(Sequelize.fn('Day', Sequelize.col('occurrence_time')), reqObj.day),
+      Sequelize.where(Sequelize.fn('Month', Sequelize.col('occurrence_time')), reqObj.month)
+    )
+  }).then((res) => {
+    cb(null, res)
+  }).catch((err) => {
+    cb(err, false)
+  })
+}
+
 module.exports.getNotice = function(now, cb) {
   let earlyDay = new Date(now.getTime() - (86400000 * 4))
   let laterDay = new Date(now.getTime() + (86400000 * 4))

@@ -41,7 +41,7 @@ Router.post('/update', (req, res, next) => {
     parent_id: req.body.level[req.body.level.length - 1],
     harm_level: req.body.harm_level,
     occurrence_time: req.body.occurrence_time,
-    edit_time: req.body.edit_time,
+    edit_time: req.body.edit_time ? req.body.edit_time : new Date(),
     recurrence: req.body.recurrence,
     alertRange: req.body.alertRange,
     category: req.body.category
@@ -117,6 +117,16 @@ Router.get('/fetchEventByMonth', (req, res, next) => {
     res.json({
       success: true,
       eventsList: eventsList
+    })
+  })
+})
+
+Router.get('/fetchByDay', (req, res, next) => {
+  Events.getEventByDay(req.query, (err, eventList) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      eventsList: eventList
     })
   })
 })
