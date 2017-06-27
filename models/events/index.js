@@ -22,7 +22,8 @@ const Events = db.define('events', {
   control_end_time: Sequelize.DATE,
   edit_time: Sequelize.DATE,
   recurrence: Sequelize.STRING,
-  category: Sequelize.INTEGER
+  category: Sequelize.INTEGER,
+  remark: Sequelize.STRING
 }, {
   freezeTableName: true,
   underscored: true
@@ -61,7 +62,8 @@ module.exports.addEvent = function (newEvent, cb) {
       recurrence: newEvent.recurrence,
       control_start_time: newEvent.alertRange[0],
       control_end_time: newEvent.alertRange[1],
-      category: newEvent.category
+      category: newEvent.category,
+      remark: newEvent.remark
     })
     dbEvent.save().then((events) => {
       cb(null, events)
@@ -87,7 +89,8 @@ module.exports.addEvent = function (newEvent, cb) {
       harm_level: newEvent.harm_level,
       control_start_time: newEvent.alertRange[0],
       control_end_time: newEvent.alertRange[1],
-      category: newEvent.category
+      category: newEvent.category,
+      remark: newEvent.remark
     },
     {
       where: {
@@ -123,6 +126,7 @@ module.exports.getTree = function (cb) {
           recurrence: Number(topic1.recurrence),
           alertRange: [topic1.control_start_time, topic1.control_end_time],
           category: topic1.category,
+          remark: topic1.remark,
           children: topic1.children ? topic1.children.map(topic2 => {
             return Object.assign(
               {},
@@ -140,6 +144,7 @@ module.exports.getTree = function (cb) {
                 recurrence: Number(topic2.recurrence),
                 alertRange: [topic2.control_start_time, topic2.control_end_time],
                 category: topic2.category,
+                remark: topic2.remark,
                 children: topic2.children ? topic2.children.map(events => {
                   return Object.assign(
                     {},
@@ -156,6 +161,7 @@ module.exports.getTree = function (cb) {
                       disabled: events.type === 1,
                       recurrence: Number(events.recurrence),
                       category: events.category,
+                      remark: events.remark,
                       alertRange: [events.control_start_time, events.control_end_time]
                     }
                   )
@@ -211,7 +217,7 @@ module.exports.getEventList = function(month, cb) {
   let toDou_month = month < 10 ? ('0' + month) : month
   Events.findAll({
     attributes: [
-      'id', 'name', 'descript', 'parent_id', 'harm_level', 'level', 'occurrence_time', 'edit_time',
+      'id', 'name', 'descript', 'parent_id', 'harm_level', 'level', 'occurrence_time', 'edit_time', 'remark',
       [Sequelize.fn('date_format', Sequelize.col('occurrence_time'), '%m'), 'month']
     ],
     where: {
@@ -230,7 +236,8 @@ module.exports.getEventList = function(month, cb) {
           level: item.level,
           date: (item.occurrence_time).getDate(),
           occurrence_time: item.occurrence_time.toLocaleString(),
-          edit_time: item.edit_time
+          edit_time: item.edit_time,
+          remark: item.remark
         })
       }
     })
@@ -266,7 +273,7 @@ module.exports.getEventByMonth = function(queryObj, cb) {
   recurrence.category = 1
   Events.findAll({
     attributes: [
-      'id', 'name', 'occurrence_time', 'descript', 'control_start_time', 'control_end_time',
+      'id', 'name', 'occurrence_time', 'descript', 'control_start_time', 'control_end_time', 'remark',
       [Sequelize.fn('date_format', Sequelize.col('occurrence_time'), '%m'), 'month']
     ],
     where: recurrence
@@ -281,7 +288,8 @@ module.exports.getEventByMonth = function(queryObj, cb) {
           end: queryObj.view ? $utils.formatCalendarDate(events.control_end_time) : '',
           month: events.get('month'),
           cssClass: 'month_color',
-          descript: events.descript
+          descript: events.descript,
+          remark: events.remark
         }
       )
     })
