@@ -27,7 +27,8 @@ router.post('/login', (req, res, next) => {
           user: {
             name: user.name,
             username: user.username,
-            email: user.email
+            email: user.email,
+            admin: user.admin
           }
         })
       } else {
@@ -60,7 +61,8 @@ router.get('/profile', passport.authenticate('jwt', {session: false}), (req, res
     user: {
       name: req.user.name,
       username: req.user.username,
-      email: req.user.email
+      email: req.user.email,
+      admin: req.user.admin
     }
   })
 })
