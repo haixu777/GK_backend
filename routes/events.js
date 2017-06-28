@@ -1,5 +1,20 @@
 const express = require('express')
 const Router = express.Router()
+const path = require('path')
+const fs = require('fs')
+const exec = require('child-process-promise').exec
+
+const multer = require('multer')
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'process_image/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, req.body.eventId + '.jpg')
+  }
+})
+
+var upload = multer({ storage: storage }).array('file')
 
 const Events = require('../models/events')
 const Control = require('../models/control')
@@ -202,6 +217,37 @@ Router.get('/fetchGroup', (req, res, next) => {
       success: true,
       groupList: groupList
     })
+  })
+})
+
+Router.post('/process_upload', (req, res, next) => {
+  upload(req, res, (err) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      msg: '上传成功'
+    })
+  })
+})
+
+Router.get('/process_image', (req, res, next) => {
+  // res.sendFile(path.join(__dirname, '../process_image', '220.jpg'))
+  var imagePath = 'process_image/' + req.query.eventId + '.jpg'
+  fs.exists(imagePath, (isExists) => {
+    if (isExists) {
+      fs.readFile(imagePath, (err, data) => {
+        if (err) throw err
+        res.json({
+          success: true,
+          buffer: data
+        })
+      })
+    } else {
+      res.json({
+        success: false,
+        msg: 'image does not exists!'
+      })
+    }
   })
 })
 
