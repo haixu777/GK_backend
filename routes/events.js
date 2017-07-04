@@ -251,4 +251,24 @@ Router.get('/process_image', (req, res, next) => {
   })
 })
 
+Router.post('/process_image/del', (req, res, next) => {
+  var imagePath = 'process_image/' + req.body.eventId + '.jpg'
+  fs.exists(imagePath, (isExists) => {
+    if (isExists) {
+      exec(`rm ${imagePath}`, (err, out) => {
+        if (err) throw err
+        res.json({
+          success: true,
+          msg: '删除成功'
+        })
+      })
+    } else {
+      res.json({
+        success: false,
+        msg: '图片不存在'
+      })
+    }
+  })
+})
+
 module.exports = Router
