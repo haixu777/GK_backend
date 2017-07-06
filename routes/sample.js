@@ -170,8 +170,17 @@ Router.get('/autoDownload', (req, res, next) => {
 Router.get('/download', (req, res, next) => {
   Sample.findById(req.query.id)
     .then((sample) => {
-      let filePath = sample.sample_path
-      let fileName = sample.sample_path.split('/').pop()
+      let fileArray = sample.sample_path.split('/')
+      let dir = fileArray[0]
+      let filePath = ''
+      let fileName = ''
+      if (dir === 'upload') { // 相对路径
+        filePath = sample.sample_path
+        fileName = fileArray.pop()
+      } else { // 绝对路径
+        filePath = '../' + sample.sample_path
+        fileName = fileArray.pop()
+      }
       res.download(filePath, fileName)
     }).catch((err) => {
       res.json({
