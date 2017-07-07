@@ -52,8 +52,10 @@ module.exports.getList = function(reqObj, cb) {
     offset: reqObj.currentPage * reqObj.perItem,
     where: {
       event_id: reqObj.eventId ? reqObj.eventId : { $ne: null },
-      sample_format: reqObj.sample_format ? reqObj.sample_format : { $ne: null },
-      keyword: (reqObj.hasKeyword === '') ? ({ $not: true }) : Number(reqObj.hasKeyword) ? { $ne: null } : null
+      sample_format: (!reqObj.sample_format) ? ({ $not: true }) : reqObj.sample_format,
+      // hasKeyword: 0,1,-1
+      // 0: 未配置, 1: 未配置, -1: 所有
+      keyword: (reqObj.hasKeyword === '') ? ({ $not: true }) : (Number(reqObj.hasKeyword) ? { $ne: '' } : '')
     },
     include: {
       model: Events,

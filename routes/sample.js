@@ -1,11 +1,22 @@
 const express = require('express')
 const Router = express.Router()
 const exec = require('child-process-promise').exec
+const fs = require('fs')
 
 const multer = require('multer')
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'upload/')
+    var now = new Date()
+    var path = '../预处理/' + now.getFullYear() + '/' + toDou(now.getMonth() + 1) + '/' + toDou(now.getDate())
+    fs.stat(path, (err, stat) => {
+      if (err) {
+        exec('mkdir -p ' + path).then(() => {
+          cb(null, path+'/')
+        })
+      } else {
+        cb(null, path+'/')
+      }
+    })
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname)
@@ -191,6 +202,10 @@ Router.get('/download', (req, res, next) => {
       })
     })
 })
+
+function toDou(n) {
+  return n >= 10 ? n : ('0' + n)
+}
 
 
 module.exports = Router
