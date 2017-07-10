@@ -21,7 +21,8 @@ const Sample = db.define('samples', {
   sample_content: Sequelize.STRING,
   sample_path: Sequelize.STRING,
   sample_format: Sequelize.STRING,
-  event_id: Sequelize.UUID
+  event_id: Sequelize.UUID,
+  keyword: Sequelize.STRING
 }, {
   freezeTableName: true,
   underscored: true
@@ -51,6 +52,8 @@ module.exports.getList = function(reqObj, cb) {
     offset: reqObj.currentPage * reqObj.perItem,
     where: {
       event_id: reqObj.eventId ? reqObj.eventId : { $ne: null },
+      sample_format: reqObj.sample_format ? reqObj.sample_format : { $ne: null },
+      keyword: (reqObj.hasKeyword === '') ? ({ $not: true }) : Number(reqObj.hasKeyword) ? { $ne: null } : null
     },
     include: {
       model: Events,
@@ -77,6 +80,7 @@ module.exports.getList = function(reqObj, cb) {
               sample_format: sample.sample_format,
               sample_path: sample.sample_path,
               sample_title: sample.sample_title,
+              keyword: sample.keyword,
               url: sample.url,
               event_name: sample.event.name,
               event_id: sample.event_id
@@ -106,6 +110,7 @@ module.exports.updateSample = function(reqObj, cb) {
       sample_format: reqObj.sample_format,
       sample_path: reqObj.sample_path,
       sample_title: reqObj.sample_title,
+      keyword: (reqObj.keyword).replace(/\s+/g, ' ').trim(),
       url: reqObj.url
     },
     {
@@ -136,22 +141,24 @@ module.exports.extra = function(reqObj, cb) {
   autoSample.findById(reqObj.sampleId)
     .then((_autoSample) => {
       let db_sample = Sample.build({
-        forensic_date: _autoSample.upload_date,
+        forensic_date: _autoSample.forensic_date,
         post: reqObj.post,
         url: reqObj.url,
-        publish_platform: reqObj.platform,
-        publish_chanel: reqObj.chanel,
+        publish_platform: reqObj.publish_platform,
+        publish_chanel: reqObj.publish_chanel,
         publish_time: reqObj.publish_time,
         publish_account: reqObj.publish_account,
+        forensic_date: reqObj.forensic_date,
         sample_title: _autoSample.name,
-        sample_content: reqObj.content,
+        sample_content: reqObj.sample_content,
         sample_path: _autoSample.path,
-        sample_format: reqObj.format,
-        event_id: reqObj.eventId
+        sample_format: reqObj.sample_format,
+        event_id: reqObj.event_id,
+        keyword: (reqObj.keyword).replace(/\s+/g, ' ').trim()
       })
       db_sample.save().then(() => {
         _autoSample.destroy().then(() => {
-          cb(null, `样本: ${reqObj.title}, 抽取成功！`)
+          cb(null, `样本: ${reqObj.sample_title}, 抽取成功！`)
         }).catch((err) => {
           cb(err, false)
         })

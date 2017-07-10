@@ -26,7 +26,9 @@ Router.get('/fetchList', (req, res, next) => {
       currentPage: Number(req.query.currentPage),
       sort_key: req.query.sort_key,
       sort_order: req.query.sort_order,
-      eventId: req.query.eventId
+      eventId: req.query.eventId,
+      sample_format: req.query.sample_format,
+      hasKeyword: req.query.hasKeyword
     }
   )
   Sample.getList(reqObj, (err, sampleList) => {
