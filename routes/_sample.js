@@ -1,8 +1,7 @@
 const express = require('express')
 const Router = express.Router()
-const exec = require('child_process').exec
+const exec = require('child-process-promise').exec
 const fs = require('fs')
-const mkdirp = require('mkdirp')
 
 const multer = require('multer')
 const storage = multer.diskStorage({
@@ -11,12 +10,8 @@ const storage = multer.diskStorage({
     var path = '../预处理/' + now.getFullYear() + '/' + toDou(now.getMonth() + 1) + '/' + toDou(now.getDate())
     fs.stat(path, (err, stat) => {
       if (err) {
-        mkdirp(path, (err) => {
-       	  if (err) {
-       	  	throw err
-       	  } else {
-       	  	cb(null, path+'/')
-       	  }
+        exec('mkdir -p ' + path).then((error, stdout, stderr) => {
+          cb(null, path+'/')
         })
       } else {
         cb(null, path+'/')
@@ -84,16 +79,16 @@ Router.post('/del', (req, res, next) => {
       path = '../' + sample_path
     }
 
-    exec(`rm ${path}`, function(err, msg) {
-      if (err) {
-      	throw err
-      } else {
-		res.json({
-		  success: true,
-		  msg: msg
-		})
-      }
-
+    exec(`rm ${path}`).then(() => {
+      res.json({
+        success: true,
+        msg: msg
+      })
+    }).catch((err) => {
+      res.json({
+        success: false,
+        msg: err
+      })
     })
 
   })
@@ -162,15 +157,16 @@ Router.get('/fetchAutoList', (req, res, next) => {
 Router.post('/autoDel', (req, res, next) => {
   Sample_auto.del(req.body.id, (err, msg) => {
     if (err) throw err
-    exec(`rm ../${req.body.path}`, function(err, msg) {
-      if (err) {
-      	throw err
-      } else {
-      	res.json({
-      	  success: true,
-      	  msg: msg
-      	})
-      }
+    exec(`rm ../${req.body.path}`).then(() => {
+      res.json({
+        success: true,
+        msg: msg
+      })
+    }).catch((err) => {
+      res.json({
+        success: false,
+        msg: err
+      })
     })
   })
 })

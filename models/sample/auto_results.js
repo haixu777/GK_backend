@@ -51,9 +51,11 @@ module.exports.getList = function(reqObj, cb) {
 }
 
 module.exports.upload = function(sample, cb) {
+  let sample_path = sample.path.split('/')
+  sample_path.splice(0,1)
   let db_sample = Sample_auto.build({
     name: sample.name,
-    path: sample.path
+    path: sample_path.join('/')
   })
   db_sample.save().then((res) => {
     cb(null, sample.name)
