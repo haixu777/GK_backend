@@ -25,6 +25,7 @@ router.post('/login', (req, res, next) => {
           success: true,
           token: 'JWT ' + token,
           user: {
+            id: user.id,
             name: user.name,
             username: user.username,
             email: user.email,
@@ -64,6 +65,18 @@ router.get('/profile', passport.authenticate('jwt', {session: false}), (req, res
       email: req.user.email,
       admin: req.user.admin
     }
+  })
+})
+
+router.get('/list', (req, res, next) => {
+  User.getList((err, userList) => {
+    if (err) {
+      throw err
+    }
+    res.json({
+      success: true,
+      userList: userList
+    })
   })
 })
 

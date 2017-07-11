@@ -4,6 +4,7 @@ const $utils = require('../../utils')
 const autoSample = require('./auto_results')
 
 const Events = require('../events')
+const User = require('../user')
 
 const Sample = db.define('samples', {
   id: {
@@ -22,7 +23,9 @@ const Sample = db.define('samples', {
   sample_path: Sequelize.STRING,
   sample_format: Sequelize.STRING,
   event_id: Sequelize.UUID,
-  keyword: Sequelize.STRING
+  keyword: Sequelize.STRING,
+  user_id: Sequelize.INTEGER,
+  update_time: Sequelize.TIME
 }, {
   freezeTableName: true,
   underscored: true
@@ -30,6 +33,7 @@ const Sample = db.define('samples', {
 })
 
 Sample.belongsTo(Events)
+Sample.belongsTo(User)
 
 module.exports = Sample
 
@@ -55,13 +59,21 @@ module.exports.getList = function(reqObj, cb) {
       sample_format: (!reqObj.sample_format) ? ({ $not: true }) : reqObj.sample_format,
       // hasKeyword: 0,1,-1
       // 0: 未配置, 1: 未配置, -1: 所有
-      keyword: (reqObj.hasKeyword === '') ? ({ $not: true }) : (Number(reqObj.hasKeyword) ? { $ne: '' } : '')
+      keyword: (reqObj.hasKeyword === '') ? ({ $not: true }) : (Number(reqObj.hasKeyword) ? { $ne: '' } : ''),
+      user_id: (!reqObj.user_id) ? ({ $not: false }) : reqObj.user_id,
+      forensic_date: reqObj.time_start ? { lte: reqObj.time_end, gte: reqObj.time_start } : { $ne: null }
     },
-    include: {
-      model: Events,
-      attributes: ['name'],
-      required: true
-    },
+    include: [
+      {
+        model: Events,
+        attributes: ['name'],
+        required: true
+      },
+      {
+        model: User,
+        attributes: ['name']
+      }
+    ],
     order: reqObj.sort_key + ' ' + reqObj.sort_order
   }).then((res) => {
     const resObj = Object.assign(
@@ -85,7 +97,9 @@ module.exports.getList = function(reqObj, cb) {
               keyword: sample.keyword,
               url: sample.url,
               event_name: sample.event.name,
-              event_id: sample.event_id
+              event_id: sample.event_id,
+              operator: sample.user.name,
+              update_time: $utils.formatTime(sample.update_time),
             }
           )
         }),
@@ -113,7 +127,8 @@ module.exports.updateSample = function(reqObj, cb) {
       sample_path: reqObj.sample_path,
       sample_title: reqObj.sample_title,
       keyword: (reqObj.keyword).replace(/\s+/g, ' ').trim(),
-      url: reqObj.url
+      url: reqObj.url,
+      user_id: Number(reqObj.user_id)
     },
     {
       where: {
@@ -156,7 +171,8 @@ module.exports.extra = function(reqObj, cb) {
         sample_path: _autoSample.path,
         sample_format: reqObj.sample_format,
         event_id: reqObj.event_id,
-        keyword: (reqObj.keyword).replace(/\s+/g, ' ').trim()
+        keyword: (reqObj.keyword).replace(/\s+/g, ' ').trim(),
+        user_id: Number(reqObj.user_id)
       })
       db_sample.save().then(() => {
         _autoSample.destroy().then(() => {

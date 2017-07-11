@@ -4,6 +4,10 @@ const config = require('../config')
 const bcrypt = require('bcryptjs')
 
 const User = db.define('user', {
+  id: {
+    type: Sequelize.UUID,
+    primaryKey: true
+  },
   name: Sequelize.STRING,
   username: Sequelize.STRING,
   password: Sequelize.STRING,
@@ -42,4 +46,22 @@ module.exports.comparePassword = function(candicatePassword, hash, cb) {
     if (err) throw err
     cb(null, isMatch)
   })
+}
+
+module.exports.getList = function(cb) {
+  User.findAll()
+    .then((userList) => {
+      let resObj = userList.map((user) => {
+        return Object.assign(
+          {},
+          {
+            value: user.id,
+            text: user.name
+          }
+        )
+      })
+      cb(null, resObj)
+    }).catch((err) => {
+      cb(err, false)
+    })
 }
