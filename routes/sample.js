@@ -159,6 +159,22 @@ Router.get('/fetchAutoList', (req, res, next) => {
   })
 })
 
+Router.post('/handleExtra', (req, res, next) => {
+  Sample_auto.extra(req.body.id, (err, text) => {
+    if (err) {
+      res.json({
+        success: false,
+        msg: err
+      })
+    } else {
+      res.json({
+        success: true,
+        text: text
+      })
+    }
+  })
+})
+
 Router.post('/autoDel', (req, res, next) => {
   Sample_auto.del(req.body.id, (err, msg) => {
     if (err) throw err

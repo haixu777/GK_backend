@@ -59,7 +59,7 @@ module.exports.getList = function(reqObj, cb) {
       sample_format: (!reqObj.sample_format) ? ({ $not: true }) : reqObj.sample_format,
       // hasKeyword: 0,1,-1
       // 0: 未配置, 1: 未配置, -1: 所有
-      keyword: (reqObj.hasKeyword === '') ? ({ $not: true }) : (Number(reqObj.hasKeyword) ? { $ne: '' } : ''),
+      keyword: (reqObj.hasKeyword === '') ? ({ $not: true }) : (Number(reqObj.hasKeyword) ? { $ne: '' } : null),
       user_id: (!reqObj.user_id) ? ({ $not: false }) : reqObj.user_id,
       forensic_date: reqObj.time_start ? { lte: reqObj.time_end, gte: reqObj.time_start } : { $ne: null }
     },
@@ -171,7 +171,7 @@ module.exports.extra = function(reqObj, cb) {
         sample_path: _autoSample.path,
         sample_format: reqObj.sample_format,
         event_id: reqObj.event_id,
-        keyword: (reqObj.keyword).replace(/\s+/g, ' ').trim(),
+        keyword: (reqObj.keyword) ? ((reqObj.keyword).replace(/\s+/g, ' ').trim()) : null,
         user_id: Number(reqObj.user_id)
       })
       db_sample.save().then(() => {

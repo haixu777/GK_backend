@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize')
 const db = require('../../config/database')
 const $utils = require('../../utils')
+const exec = require('child_process').exec
 
 const Sample_auto = db.define('samples_auto', {
   id: {
@@ -87,4 +88,30 @@ module.exports.isExist = function(filename, cb) {
   }).catch((err) => {
     cb(err, false)
   })
+}
+
+module.exports.extra = function(id, cb) {
+  Sample_auto.findById(id)
+    .then((sample) => {
+      let fileType = sample.name.split('.').pop()
+      if (fileType == 'png' || fileType == 'jpg') {
+        exec(`cd extra_app/ && python img2text.py ${sample.path}`, (err, msg) => {
+          if (err) {
+            cb(err, false)
+          } else {
+            cb(null, msg)
+          }
+        })
+      } else if (fileType == 'pdf') {
+        exec(`cd extra_app/ && python pdf2text.py ${sample.path} ${sample.name}`, (err, msg) => {
+          if (err) {
+            cb(err, false)
+          } else {
+            cb(null, msg)
+          }
+        })
+      }
+    }).catch((err) => {
+      cb(err, false)
+    })
 }
