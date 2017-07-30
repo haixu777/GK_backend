@@ -44,6 +44,7 @@ Router.get('/fetchList', (req, res, next) => {
       sort_order: req.query.sort_order,
       eventId: req.query.eventId,
       sample_format: req.query.sample_format,
+      hasPlatform: req.query.hasPlatform,
       hasKeyword: req.query.hasKeyword,
       user_id: req.query.user_id,
       time_start: req.query.time_start,
