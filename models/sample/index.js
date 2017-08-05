@@ -60,6 +60,7 @@ module.exports.getList = function(reqObj, cb) {
       // hasKeyword: 0,1,-1
       // 0: 未配置, 1: 未配置, -1: 所有
       keyword: (reqObj.hasKeyword === '') ? ({ $not: true }) : (Number(reqObj.hasKeyword) ? { $ne: '' } : ''),
+      sample_content: (reqObj.hasContent === '') ? ({ $not: true }) : (Number(reqObj.hasContent) ? { $ne: null } : null),
       publish_platform: (reqObj.hasPlatform === '') ? ({ $not: true }) : (Number(reqObj.hasPlatform) ? { $ne: '' } : null),
       user_id: (!reqObj.user_id) ? ({ $not: false }) : reqObj.user_id,
       forensic_date: reqObj.time_start ? { lte: reqObj.time_end, gte: reqObj.time_start } : { $ne: null }

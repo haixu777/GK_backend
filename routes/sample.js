@@ -46,6 +46,7 @@ Router.get('/fetchList', (req, res, next) => {
       sample_format: req.query.sample_format,
       hasPlatform: req.query.hasPlatform,
       hasKeyword: req.query.hasKeyword,
+      hasContent: req.query.hasContent,
       user_id: req.query.user_id,
       time_start: req.query.time_start,
       time_end: req.query.time_end
