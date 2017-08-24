@@ -348,3 +348,17 @@ module.exports.fetchEventListForControl = function(cb) {
     cb(err, false)
   })
 }
+
+module.exports.fetchAccountByEventId = function(id, cb) {
+  Sample.findAll({
+    attributes: ['publish_account'],
+    where: {
+      event_id: id
+    }
+  }).then((res) => {
+    console.log(res)
+    cb(null, res)
+  }).catch((err) => {
+    cb(err, false)
+  })
+}

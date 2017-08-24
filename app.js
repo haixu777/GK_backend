@@ -51,7 +51,7 @@ app.post('/login', urlencodedParser, (req, res, next) => {
       throw err
       return res.send(err)
     }
-    res.json(msg: result)
+    res.json({msg: result})
   })
 })
 

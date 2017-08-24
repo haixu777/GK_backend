@@ -94,7 +94,7 @@ module.exports.extra = function(id, cb) {
   Sample_auto.findById(id)
     .then((sample) => {
       let fileType = sample.name.split('.').pop()
-      if (fileType == 'png' || fileType == 'jpg') {
+      if (fileType == 'png' || fileType == 'jpg' || fileType == 'jepg') {
         exec(`cd extra_app/ && python img2text.py ${sample.path}`, (err, msg) => {
           if (err) {
             cb(err, false)
@@ -110,6 +110,8 @@ module.exports.extra = function(id, cb) {
             cb(null, msg)
           }
         })
+      } else {
+        cb(null, '抽取结束!')
       }
     }).catch((err) => {
       cb(err, false)

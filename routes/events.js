@@ -201,7 +201,16 @@ Router.get('/fetchPlatform', (req, res, next) => {
 })
 
 Router.get('/fetchAccount', (req, res, next) => {
+  /*
   Account.fetchByEventId(req.query.eventId, (err, accountList) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      accountList: accountList
+    })
+  })
+  */
+  Sample.fetchAccountByEventId(req.query.eventId, (err, accountList) => {
     if (err) throw err
     res.json({
       success: true,
