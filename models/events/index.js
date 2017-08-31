@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize')
 const db = require('../../config/database')
+const rp = require('request-promise')
 
 const $utils = require('../../utils')
 
@@ -60,13 +61,54 @@ module.exports.addEvent = function (newEvent, cb) {
       occurrence_time: newEvent.occurrence_time,
       edit_time: newEvent.edit_time,
       recurrence: newEvent.recurrence,
-      control_start_time: newEvent.alertRange[0],
-      control_end_time: newEvent.alertRange[1],
+      control_start_time: newEvent.alertRange ? newEvent.alertRange[0] : null,
+      control_end_time: newEvent.alertRange ? newEvent.alertRange[1] : null,
       category: newEvent.category,
       remark: newEvent.remark
     })
-    dbEvent.save().then((events) => {
-      cb(null, events)
+    dbEvent.save().then((ins) => {
+      //cb(null, events)
+      Events.findOne({
+	where: {
+	  name: newEvent.name,
+          descript: newEvent.descript,
+	  edit_time: newEvent.edit_time
+	}
+      }).then((now_event) => {
+	console.log('id:' + now_event.id + ', name: ' + now_event.name + ', desc: ' + now_event.descript + ', harm: ' + now_event.harm_level + ', control: ' + now_event.control_start_time)
+	rp({
+	  method: 'POST',
+	  uri: 'http://10.136.88.96:8080/api/events_sync/add.do',
+	  json: true,
+	  body: {
+	    ID: now_event.id,
+            NAME: now_event.name,
+            DESCRIPT: now_event.descript,
+            HARM_LEVEL: now_event.harm_level,
+            CONTROL_START_TIME: now_event.control_start_time || null
+	  }
+	}).then((res) => {
+	  console.log(res)
+	  cb(null, null)
+	})
+      })
+      /*
+      rp({
+        method: 'POST',
+        uri: 'http://10.136.88.96:8080/api/events_sync/add.do',
+	json: true,
+        body: {
+	  ID: events.id,
+	  NAME: events.name,
+	  DESCRIPT: events.descript,
+	  HARM_LEVEL: events.harm_level,
+	  CONTROL_START_TIME: events.control_start_time
+        }
+      }).then((res) => {
+	console.log(res)
+	cb(null, events)
+      })
+      */
     }).catch((err) => {
       cb(err, null)
     })
@@ -87,8 +129,8 @@ module.exports.addEvent = function (newEvent, cb) {
       edit_time: newEvent.edit_time,
       recurrence: newEvent.recurrence,
       harm_level: newEvent.harm_level,
-      control_start_time: newEvent.alertRange[0],
-      control_end_time: newEvent.alertRange[1],
+      control_start_time: newEvent.alertRange ? newEvent.alertRange[0] : null,
+      control_end_time: newEvent.alertRange ? newEvent.alertRange[1] : null,
       category: newEvent.category,
       remark: newEvent.remark
     },
@@ -98,7 +140,21 @@ module.exports.addEvent = function (newEvent, cb) {
       }
     }
   ).then((events) => {
-    cb(null, events)
+    rp({
+      method: 'POST',
+      uri: 'http://10.136.88.96:8080/api/events_sync/updateById.do',
+      json: true,
+      body: {
+	ID: newEvent.id,
+	NAME: newEvent.name,
+	DESCRIPT: newEvent.descript,
+	HARM_LEVEL: (newEvent.harm_level).toString(),
+	CONTROL_START_TIME: newEvent.alertRange ? newEvent.alertRange[0] : null
+      }
+    }).then((res) => {
+	console.log(res)
+	cb(null, null)
+    })
   }).catch((err) => {
     cb(err, false)
   })
@@ -204,7 +260,18 @@ module.exports.delEvents = function(id, cb) {
         cb(null, null)
       }
       _event.destroy().then(() => {
-        cb(null, '事件：' + _event.name + ', 删除成功!')
+        //cb(null, '事件：' + _event.name + ', 删除成功!')
+	rp({
+	  method: 'POST',
+	  uri: 'http://10.136.88.96:8080/api/events_sync/delById.do',
+	  json: true,
+	  body: {
+	    ID: id
+	  }
+	}).then((res) => {
+	  console.log(res)
+	  cb(null, '事件：' + _event.name + ',删除乘车!')
+	})
       }).catch((err) => {
         cb(err, false)
       })
@@ -344,20 +411,6 @@ module.exports.fetchEventListForControl = function(cb) {
       )
     })
     cb(null, resObj)
-  }).catch((err) => {
-    cb(err, false)
-  })
-}
-
-module.exports.fetchAccountByEventId = function(id, cb) {
-  Sample.findAll({
-    attributes: ['publish_account'],
-    where: {
-      event_id: id
-    }
-  }).then((res) => {
-    console.log(res)
-    cb(null, res)
   }).catch((err) => {
     cb(err, false)
   })

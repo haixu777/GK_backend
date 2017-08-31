@@ -95,15 +95,15 @@ module.exports.extra = function(id, cb) {
     .then((sample) => {
       let fileType = sample.name.split('.').pop()
       if (fileType == 'png' || fileType == 'jpg' || fileType == 'jepg') {
-        exec(`cd extra_app/ && python img2text.py ${sample.path}`, (err, msg) => {
+        exec(`cd extra_app/ && python img2text.py ../../../../${sample.path}`, (err, msg) => {
           if (err) {
             cb(err, false)
           } else {
             cb(null, msg)
           }
         })
-      } else if (fileType == 'pdf') {
-        exec(`cd extra_app/ && python pdf2text.py ${sample.path} ${sample.name}`, (err, msg) => {
+      } else if (fileType == 'pdf' || fileType == 'html' || fileType == 'html') {
+        exec(`cd extra_app/ && python pdf2text.py ../../../../${sample.path} ${sample.name}`, (err, msg) => {
           if (err) {
             cb(err, false)
           } else {
@@ -111,8 +111,8 @@ module.exports.extra = function(id, cb) {
           }
         })
       } else {
-        cb(null, '抽取结束!')
-      }
+		cb(null, '抽取结束!')
+        }
     }).catch((err) => {
       cb(err, false)
     })

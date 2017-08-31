@@ -8,7 +8,7 @@ const multer = require('multer')
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     var now = new Date()
-    var path = '../预处理/' + now.getFullYear() + '/' + toDou(now.getMonth() + 1) + '/' + toDou(now.getDate())
+    var path = '/loongstore/lrzl/data01/calendar_sample/预处理/' + now.getFullYear() + '/' + toDou(now.getMonth() + 1) + '/' + toDou(now.getDate())
     fs.stat(path, (err, stat) => {
       if (err) {
         mkdirp(path, (err) => {
@@ -45,8 +45,8 @@ Router.get('/fetchList', (req, res, next) => {
       eventId: req.query.eventId,
       sample_format: req.query.sample_format,
       hasPlatform: req.query.hasPlatform,
-      hasKeyword: req.query.hasKeyword,
       hasContent: req.query.hasContent,
+      hasKeyword: req.query.hasKeyword,
       user_id: req.query.user_id,
       time_start: req.query.time_start,
       time_end: req.query.time_end
@@ -82,8 +82,10 @@ Router.post('/del', (req, res, next) => {
 
     if (dir === 'upload') { // 相对路径
       path = sample_path
+    } else if (dir === 'loongstore') {
+      path = '/' + sample_path
     } else { // 绝对路径
-      path = '../' + sample_path
+      path = '../../../loongstore/lrzl/data01/calendar_sample/' + sample_path
     }
 
     exec(`rm ${path}`, function(err, msg) {
@@ -103,6 +105,10 @@ Router.post('/del', (req, res, next) => {
 
 Router.post('/extra', (req, res, next) => {
   Sample.extra(req.body, (err, msg) => {
+    if (err) {
+      throw err
+      return
+    }
     res.json({
       success: true,
       info: msg
@@ -180,7 +186,7 @@ Router.post('/handleExtra', (req, res, next) => {
 Router.post('/autoDel', (req, res, next) => {
   Sample_auto.del(req.body.id, (err, msg) => {
     if (err) throw err
-    exec(`rm ../${req.body.path}`, function(err, msg) {
+    exec(`rm /${req.body.path}`, function(err, msg) {
       if (err) {
       	throw err
       } else {
@@ -205,7 +211,8 @@ Router.get('/autoIsExist', (req, res, next) => {
 Router.get('/autoDownload', (req, res, next) => {
   Sample_auto.findById(req.query.id)
     .then((sample) => {
-      let filePath = '../' + sample.path
+      //let filePath = './../../loongstore/lrzl/data01/calendar_sample/' + sample.path
+      let filePath = '/' + sample.path
       res.download(filePath, sample.name)
     }).catch((err) => {
       res.json({
@@ -225,10 +232,15 @@ Router.get('/download', (req, res, next) => {
       if (dir === 'upload') { // 相对路径
         filePath = sample.sample_path
         fileName = fileArray.pop()
+      } else if (dir === 'loongstore') {
+        filePath = '/' + sample.sample_path
+        fileName = fileArray.pop()
       } else { // 绝对路径
-        filePath = '../' + sample.sample_path
+        filePath = '../../../loongstore/lrzl/data01/calendar_sample/' + sample.sample_path
         fileName = fileArray.pop()
       }
+      console.log('filePath:' + filePath)
+      console.log('fileName:' + fileName)
       res.download(filePath, fileName)
     }).catch((err) => {
       res.json({

@@ -34,8 +34,14 @@ app.use(passport.session())
 require('./config/passport')(passport)
 
 var client = null
+var userInfo_client = null
 var wsdl_url = 'http://10.136.162.26:8080/AuthProxy/webservice/ServiceAuth?wsdl'
+var userInfo_wsdl_url = 'http://10.136.162.26:8080/WebServices/services/baseResInfo?wsdl'
 var ticket = null
+var menhu_userAccount = null
+var menhu_signValue = null
+var menhu_userId = null
+
 Soap.createClient(wsdl_url, (err, _client) => {
   if (err) {
     throw err
@@ -43,10 +49,37 @@ Soap.createClient(wsdl_url, (err, _client) => {
   client = _client
 })
 
+Soap.createClient(userInfo_wsdl_url, (err, _client) => {
+  if (err) {
+    throw err
+  }
+  userInfo_client = _client
+})
+
 app.post('/login', urlencodedParser, (req, res, next) => {
-  // res.send(req.body)
   ticket = req.body.ticket
-  client.nsc_parseTicket({ ticket: ticket, signValue: 'signValue', clientIP: '127.0.0.1' }, (err, result) => {
+  console.log('ticket: '+ ticket)
+  client.ncs_parseTicket({ ticket: ticket, signValue: 'signValue', clientIP: '127.0.0.1' }, (err, result) => {
+    if (err) {
+      throw err
+      return res.send(err)
+    }
+    var jsonRes = JSON.parse(result.out)
+    result.out = jsonRes
+    //res.json(result)
+    menhu_userAccount = result.out.content.userAccount
+    console.log('userAccount: ' + menhu_userAccount)
+    menhu_signValue = result.out.content.signValue
+    menhu_userId = result.out.content.userId
+    res.cookie('realName', unescape(result.out.content.realName), { expires: new Date(Date.now() + 7*24*60*60*1000), httpOnly: false })
+    res.cookie('isAdmin', true, { expires: new Date(Date.now() + 7*24*60*60*1000), httpOnly: false })
+    res.redirect('http://10.136.88.96:3333/home')
+  })
+})
+
+app.get('/menhuGroupData', (req, res, next) => {
+  console.log('userAccount: ' + menhu_userAccount)
+  userInfo_client.getUserInfoByAccount({ accountName: menhu_userAccount, ticket: ticket, signValue: menhu_signValue }, (err, result) => {
     if (err) {
       throw err
       return res.send(err)
@@ -58,7 +91,8 @@ app.post('/login', urlencodedParser, (req, res, next) => {
 /*
 app.post('/logout', (req, res, next) => {
   res.clearCookie('realName')
-  res.redirect('http://10.136.88.98')
+  //res.redirect('http://10.136.88.98')
+  res.json({ logout: true })
 })
 */
 
@@ -69,7 +103,7 @@ app.use('/control', Control)
 app.use('/group', Group)
 app.use('/keywords', Keywords)
 
-const port = 3000
+const port = 3333
 
 app.listen(port, () => {
   console.log('server started at port: ' + port)

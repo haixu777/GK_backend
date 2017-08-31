@@ -23,6 +23,7 @@ const Sample = db.define('samples', {
   sample_path: Sequelize.STRING,
   sample_format: Sequelize.STRING,
   event_id: Sequelize.UUID,
+  operator: Sequelize.STRING,
   keyword: Sequelize.STRING,
   user_id: Sequelize.INTEGER,
   update_time: Sequelize.TIME
@@ -50,6 +51,7 @@ module.exports.getSampleByEvent = function(eventId, cb) {
 }
 
 module.exports.getList = function(reqObj, cb) {
+  console.log(reqObj)
   reqObj.currentPage--
   Sample.findAndCountAll({
     limit: reqObj.perItem,
@@ -60,21 +62,23 @@ module.exports.getList = function(reqObj, cb) {
       // hasKeyword: 0,1,-1
       // 0: 未配置, 1: 未配置, -1: 所有
       keyword: (reqObj.hasKeyword === '') ? ({ $not: true }) : (Number(reqObj.hasKeyword) ? { $ne: '' } : ''),
-      sample_content: (reqObj.hasContent === '') ? ({ $not: true }) : (Number(reqObj.hasContent) ? { $ne: null } : null),
-      publish_platform: (reqObj.hasPlatform === '') ? ({ $not: true }) : (Number(reqObj.hasPlatform) ? { $ne: '' } : null),
-      user_id: (!reqObj.user_id) ? ({ $not: false }) : reqObj.user_id,
-      forensic_date: reqObj.time_start ? { lte: reqObj.time_end, gte: reqObj.time_start } : { $ne: null }
+      // user_id: (!reqObj.user_id) ? ({ $not: false }) : reqObj.user_id,
+      forensic_date: reqObj.time_start ? { lte: reqObj.time_end, gte: reqObj.time_start } : { $ne: null },
+      sample_content: (reqObj.hasContent === '') ? ({ $not: false }) : (Number(reqObj.hasContent) ? { $ne: null } : null),
+      publish_platform: (reqObj.hasPlatform === '') ? ({ $not: true }) : (Number(reqObj.hasPlatform) ? { $ne: '' } : null)
     },
     include: [
       {
         model: Events,
         attributes: ['name'],
         required: true
-      },
+      }
+      /*
       {
         model: User,
         attributes: ['name']
       }
+      */
     ],
     order: reqObj.sort_key + ' ' + reqObj.sort_order
   }).then((res) => {
@@ -100,7 +104,7 @@ module.exports.getList = function(reqObj, cb) {
               url: sample.url,
               event_name: sample.event.name,
               event_id: sample.event_id,
-              operator: sample.user.name,
+              operator: sample.operator,
               update_time: $utils.formatTime(sample.update_time),
             }
           )
@@ -128,9 +132,9 @@ module.exports.updateSample = function(reqObj, cb) {
       sample_format: reqObj.sample_format,
       sample_path: reqObj.sample_path,
       sample_title: reqObj.sample_title,
-      keyword: (reqObj.keyword).replace(/\s+/g, ' ').trim(),
+      keyword: (reqObj.keyword) ? ((reqObj.keyword).replace(/\s+/g, ' ').trim()) : '',
       url: reqObj.url,
-      user_id: Number(reqObj.user_id)
+      operator: reqObj.operator
     },
     {
       where: {
@@ -163,7 +167,7 @@ module.exports.extra = function(reqObj, cb) {
         forensic_date: _autoSample.forensic_date,
         post: reqObj.post,
         url: reqObj.url,
-        publish_platform: reqObj.publish_platform,
+        publish_platform: reqObj.publish_platform || null,
         publish_chanel: reqObj.publish_chanel,
         publish_time: reqObj.publish_time,
         publish_account: reqObj.publish_account,
@@ -173,8 +177,8 @@ module.exports.extra = function(reqObj, cb) {
         sample_path: _autoSample.path,
         sample_format: reqObj.sample_format,
         event_id: reqObj.event_id,
-        keyword: (reqObj.keyword) ? ((reqObj.keyword).replace(/\s+/g, ' ').trim()) : null,
-        user_id: Number(reqObj.user_id)
+        keyword: (reqObj.keyword) ? ((reqObj.keyword).replace(/\s+/g, ' ').trim()) : '',
+        operator: reqObj.operator
       })
       db_sample.save().then(() => {
         _autoSample.destroy().then(() => {
@@ -188,4 +192,39 @@ module.exports.extra = function(reqObj, cb) {
     }).catch((err) => {
       cb(err, false)
     })
+}
+
+module.exports.fetchAccountByEventId = function(id, cb) {
+  Sample.findAll({
+    attributes: ['publish_account'],
+    where: {
+      event_id: id
+    },
+    group: ['publish_account']
+  }).then((res) => {
+    cb(null, res)
+  }).catch((err) => {
+    cb(err, false)
+  })
+}
+
+module.exports.fetchKeywordByEventId = function(id, cb) {
+  Sample.findAll({
+    attributes: ['keyword'],
+    where: {
+      event_id: id
+    },
+    group: ['keyword']
+  }).then((res) => {
+    var resObj = []
+    for (var i=0; i<res.length; i++) {
+      //console.log(res[i]['keyword'])
+      if (res[i]['keyword']) {
+        resObj.push({label: res[i]['keyword']})
+      }
+    }
+    cb(null, resObj)
+  }).catch((err) => {
+    cb(err, false)
+  })
 }
