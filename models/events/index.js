@@ -273,7 +273,7 @@ module.exports.getEventByMonth = function(queryObj, cb) {
   recurrence.category = 1
   Events.findAll({
     attributes: [
-      'id', 'name', 'occurrence_time', 'descript', 'control_start_time', 'control_end_time', 'remark',
+      'id', 'name', 'occurrence_time', 'descript', 'control_start_time', 'control_end_time', 'remark', 'harm_level',
       [Sequelize.fn('date_format', Sequelize.col('occurrence_time'), '%m'), 'month']
     ],
     where: recurrence
@@ -287,7 +287,7 @@ module.exports.getEventByMonth = function(queryObj, cb) {
           start: queryObj.view ? ($utils.formatCalendarDate(events.control_start_time)) : ($utils.formatCalendarDate(events.occurrence_time)),
           end: queryObj.view ? $utils.formatCalendarDate(events.control_end_time) : '',
           month: events.get('month'),
-          cssClass: 'month_color',
+          cssClass: $utils.handleHarmlevel2Color(events.harm_level),
           descript: events.descript,
           remark: events.remark
         }

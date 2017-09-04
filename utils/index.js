@@ -18,8 +18,32 @@ function formatTime (date) {
   return temp.getFullYear() + '-' + toDou((temp.getMonth() + 1)) + '-' + toDou(temp.getDate())
 }
 
+function handleHarmlevel2Color (harm_level) {
+  let level = parseInt(harm_level)
+  let color = null
+  switch (level) {
+    case 0:
+      color = 'default'
+      break;
+    case 1:
+      color = 'yellow'
+      break;
+    case 2:
+      color = 'orange'
+      break;
+    case 3:
+      color= 'red'
+      break;
+    default:
+      color = 'default'
+  }
+  return color
+}
+
 module.exports = utils
 
 module.exports.formatCalendarDate = formatCalendarDate
 
 module.exports.formatTime = formatTime
+
+module.exports.handleHarmlevel2Color = handleHarmlevel2Color
