@@ -33,6 +33,7 @@ app.use(passport.session())
 
 require('./config/passport')(passport)
 
+/*
 var client = null
 var wsdl_url = 'http://10.136.162.26:8080/AuthProxy/webservice/ServiceAuth?wsdl'
 var ticket = null
@@ -42,7 +43,9 @@ Soap.createClient(wsdl_url, (err, _client) => {
   }
   client = _client
 })
+*/
 
+/*
 app.post('/login', urlencodedParser, (req, res, next) => {
   // res.send(req.body)
   ticket = req.body.ticket
@@ -53,6 +56,13 @@ app.post('/login', urlencodedParser, (req, res, next) => {
     }
     res.json({msg: result})
   })
+})
+*/
+
+app.post('/login', urlencodedParser, (req, res, next) => {
+  let ticket = req.body.ticket
+  // 8hours
+  res.cookie('ticket', ticket, { expires: new Date(Date.now() + 8*60*60*1000) })
 })
 
 /*
