@@ -13,6 +13,7 @@ const Control = require('./routes/control')
 const Sample = require('./routes/sample')
 const Group = require('./routes/group')
 const Keywords = require('./routes/keywords')
+const handleAccount = require('./routes/handleAccount')
 
 const app = express()
 
@@ -78,8 +79,9 @@ app.use('/events', Events)
 app.use('/control', Control)
 app.use('/group', Group)
 app.use('/keywords', Keywords)
+app.use('/handleAccount', handleAccount)
 
-const port = 3000
+const port = 3333
 
 app.listen(port, () => {
   console.log('server started at port: ' + port)
