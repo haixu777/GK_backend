@@ -2,6 +2,8 @@ const Sequelize = require('sequelize')
 const db = require('../../config/database')
 
 const $utils = require('../../utils')
+const Tag = require('../tag')
+const eventsTag = require('../tag/eventsTag')
 
 const Events = db.define('events', {
   id: {
@@ -34,6 +36,22 @@ Events.isHierarchy()
 
 // Events.hasMany(Events)
 // Events.belongsTo(Events)
+Events.belongsToMany(Tag, {
+  through: {
+    model: eventsTag,
+    unique: false
+  },
+  foreignKey: 'event_id',
+  constraints: false
+})
+Tag.belongsToMany(Events, {
+  through: {
+    model: eventsTag,
+    unique: false
+  },
+  foreignKey: 'tag_id',
+  constraints: false
+})
 
 module.exports = Events
 
@@ -278,6 +296,37 @@ module.exports.getEventByMonth = function(queryObj, cb) {
     ],
     where: recurrence
   }).then((eventsList) => {
+    let resObj = []
+    let count = 0
+    let resLength = eventsList.length
+    eventsList.forEach((events) => {
+      events.getTags({where: {id: queryObj.tag_id ? queryObj.tag_id : {$not: 9999}}}).then((tags) => {
+        count++
+        let e = Object.assign(
+          {},
+          {
+            id: events.id,
+            title: events.name,
+            start: queryObj.view ? ($utils.formatCalendarDate(events.control_start_time)) : ($utils.formatCalendarDate(events.occurrence_time)),
+            end: queryObj.view ? $utils.formatCalendarDate(events.control_end_time) : '',
+            month: events.get('month'),
+            cssClass: $utils.handleHarmlevel2Color(events.harm_level),
+            descript: events.descript,
+            remark: events.remark,
+            tags: $utils.formatTags(tags)
+          }
+        )
+        if (queryObj.tag_id && tags.length > 0) {
+          resObj.push(e)
+        } else if (!queryObj.tag_id){
+          resObj.push(e)
+        }
+        if (resLength === count) {
+          cb(null, resObj)
+        }
+      })
+    })
+    /*
     const resObj = eventsList.map(events => {
       return Object.assign(
         {},
@@ -294,6 +343,7 @@ module.exports.getEventByMonth = function(queryObj, cb) {
       )
     })
     return cb(null, resObj)
+    */
   }).catch((err) => {
     cb(err, false)
   })
@@ -306,7 +356,47 @@ module.exports.getEventByDay = function(reqObj, cb) {
       Sequelize.where(Sequelize.fn('Month', Sequelize.col('occurrence_time')), reqObj.month)
     )
   }).then((res) => {
-    cb(null, res)
+    let resObj = []
+    let resLength = res.length
+    let count = 0
+    if (resLength > 0) {
+      res.forEach((_event) => {
+        _event.getTags({where: {user_id: reqObj.user_id}}).then((tags) => {
+          count++
+          let temp_event = Object.assign(
+            {},
+            {
+              category: _event.category,
+              control_end_time: _event.control_end_time,
+              control_start_time: _event.control_start_time,
+              descript: _event.descript,
+              edit_time: _event.edit_time,
+              harm_level: _event.harm_level,
+              hierarchy_level: _event.hierarchy_level,
+              id: _event.id,
+              level: _event.level,
+              name: _event.name,
+              occurrence_time: _event.occurrence_time,
+              parent_id: _event.parent_id,
+              recurrence: _event.recurrence,
+              remark: _event.remark,
+              type: _event.type,
+              tags: $utils.formatTags(tags)
+            }
+          )
+          if (tags.length > 0 && reqObj.tag_id) {
+            resObj.push(temp_event)
+          } else if (!reqObj.tag_id) {
+            resObj.push(temp_event)
+          }
+          if (count === resLength) {
+            cb(null, resObj)
+          }
+        })
+      })
+    } else {
+      cb(null, [])
+    }
   }).catch((err) => {
     cb(err, false)
   })

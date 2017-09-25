@@ -14,6 +14,7 @@ const Sample = require('./routes/sample')
 const Group = require('./routes/group')
 const Keywords = require('./routes/keywords')
 const handleAccount = require('./routes/handleAccount')
+const Tag = require('./routes/tag')
 
 const app = express()
 
@@ -24,7 +25,7 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 app.disable('x-powered-by')
 
 app.use(cors())
-app.use(history())
+// app.use(history())
 
 app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, 'public')))
@@ -80,6 +81,7 @@ app.use('/control', Control)
 app.use('/group', Group)
 app.use('/keywords', Keywords)
 app.use('/handleAccount', handleAccount)
+app.use('/tag', Tag)
 
 const port = 3333
 

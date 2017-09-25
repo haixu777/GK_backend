@@ -40,6 +40,18 @@ function handleHarmlevel2Color (harm_level) {
   return color
 }
 
+function formatTags (tags) {
+  if (tags.length <= 0) {
+    return []
+  } else {
+    let resObj = []
+    tags.forEach((tag) => {
+      resObj.push({id: tag.id, label: tag.name})
+    })
+    return resObj
+  }
+}
+
 module.exports = utils
 
 module.exports.formatCalendarDate = formatCalendarDate
@@ -47,3 +59,5 @@ module.exports.formatCalendarDate = formatCalendarDate
 module.exports.formatTime = formatTime
 
 module.exports.handleHarmlevel2Color = handleHarmlevel2Color
+
+module.exports.formatTags = formatTags

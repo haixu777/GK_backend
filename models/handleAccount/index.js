@@ -16,11 +16,26 @@ const handleAccount = db.define('account_handle', {
 
 module.exports = handleAccount
 
+module.exports.getPlatformList = function(cb) {
+  handleAccount.findAll({
+    where: {
+    },
+    attributes: [Sequelize.fn('DISTINCT', Sequelize.col('platform')), 'platform'],
+  }).then((res) => {
+    cb(null, res)
+  }).catch((err) => {
+    cb(err, false)
+  })
+}
+
 module.exports.getList = function(conditionObj, cb) {
-  // conditionObj.currentPage--
+  conditionObj.currentPage--
   handleAccount.findAndCountAll({
-    // limit: conditionObj.perItem,
-    // offset: conditionObj.currentPage * conditionObj.perItem,
+    limit: Number(conditionObj.perItem),
+    offset: conditionObj.currentPage * Number(conditionObj.perItem),
+    where: {
+      platform: conditionObj.platform ? conditionObj.platform : { $ne: null }
+    }
   }).then((res) => {
     const resObj = Object.assign(
       {},

@@ -126,7 +126,9 @@ Router.get('/fetchEventSample', (req, res, next) => {
 Router.get('/fetchEventByMonth', (req, res, next) => {
   let queryObj = {
     recurrence: Number(req.query.recurrence),
-    view: Number(req.query.view)
+    view: Number(req.query.view),
+    tag_id: req.query.tag_id,
+    user_id: req.query.user_id
   }
   Events.getEventByMonth(queryObj, (err, eventsList) => {
     if (err) throw err
