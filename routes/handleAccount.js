@@ -8,11 +8,26 @@ Router.get('/platform', (req, res, next) => {
     if (err) {
       throw err
       return
+    } else {
+      res.json({
+        success: true,
+        platformList: platformList
+      })
     }
-    res.json({
-      success: true,
-      platformList: platformList
-    })
+  })
+})
+
+Router.get('/actionList', (req, res, next) => {
+  handleAccount.getActionList((err, actionList) => {
+    if (err) {
+      throw err
+      return
+    } else {
+      res.json({
+        success: true,
+        actionList: actionList
+      })
+    }
   })
 })
 
@@ -26,6 +41,48 @@ Router.get('/list', (req, res, next) => {
       success: true,
       data: accountList
     })
+  })
+})
+
+Router.post('/del', (req, res, next) => {
+  handleAccount.handleDel(req.body.id, (err, msg) => {
+    if (err) {
+      throw err
+      return
+    } else {
+      res.json({
+        success: true,
+        msg: msg
+      })
+    }
+  })
+})
+
+Router.post('/update', (req, res, next) => {
+  handleAccount.handleUpdate(req.body, (err, msg) => {
+    if (err) {
+      throw err
+      return
+    } else {
+      res.json({
+        success: true,
+        msg: msg
+      })
+    }
+  })
+})
+
+Router.post('/add', (req, res, next) => {
+  handleAccount.handleAdd(req.body, (err, msg) => {
+    if (err) {
+      throw err
+      return
+    } else {
+      res.json({
+        success: true,
+        msg: msg
+      })
+    }
   })
 })
 

@@ -20,6 +20,7 @@ Wxb_user.hasMany(Tag, {as: 'Tags', foreignKey: 'user_id'})
 
 module.exports = Wxb_user
 
+/*
 module.exports.list = function(user_id, cb) {
   Wxb_user.findOne({
     where: {
@@ -45,3 +46,4 @@ module.exports.list = function(user_id, cb) {
     cb(err, false)
   })
 }
+*/

@@ -361,7 +361,7 @@ module.exports.getEventByDay = function(reqObj, cb) {
     let count = 0
     if (resLength > 0) {
       res.forEach((_event) => {
-        _event.getTags({where: {user_id: reqObj.user_id}}).then((tags) => {
+        _event.getTags({where: {$or: [{user_id: reqObj.user_id},{dept_name: reqObj.dept_name},{global: 1}]}}).then((tags) => {
           count++
           let temp_event = Object.assign(
             {},
