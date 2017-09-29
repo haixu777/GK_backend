@@ -162,7 +162,7 @@ Router.get('/timeline', (req, res, next) => {
 
 Router.get('/notice', (req, res, next) => {
   let now = new Date()
-  Events.getNotice(now, (err, noticeList) => {
+  Events.getNotice(now, req.query.dept_name, (err, noticeList) => {
     if (err) throw err
     res.json({
       success: true,

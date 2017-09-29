@@ -402,13 +402,14 @@ module.exports.getEventByDay = function(reqObj, cb) {
   })
 }
 
-module.exports.getNotice = function(now, cb) {
-  let earlyDay = new Date(now.getTime() - (86400000 * 4))
-  let laterDay = new Date(now.getTime() + (86400000 * 4))
+module.exports.getNotice = function(now, req_deptName, cb) {
+  let earlyDay = new Date(now.getTime() - (86400000 * 3))
+  let laterDay = new Date(now.getTime() + (86400000 * 3))
   Events.findAll({
     where: {
+      $or: [{dept_name: '公有'}, {dept_name: req_deptName}],
       control_start_time: { lte: laterDay },
-      control_end_time: { gte: earlyDay },
+      control_end_time: { gte: now },
       category: 1
     }
   }).then((noticeList) => {
