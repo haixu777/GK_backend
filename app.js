@@ -14,6 +14,7 @@ const Sample = require('./routes/sample')
 const Group = require('./routes/group')
 const Keywords = require('./routes/keywords')
 const handleAccount = require('./routes/handleAccount')
+const Taizhang = require('./routes/taizhang')
 const Tag = require('./routes/tag')
 
 const app = express()
@@ -82,6 +83,7 @@ app.use('/group', Group)
 app.use('/keywords', Keywords)
 app.use('/handleAccount', handleAccount)
 app.use('/tag', Tag)
+app.use('/taizhang', Taizhang)
 
 const port = 3333
 
