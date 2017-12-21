@@ -223,3 +223,32 @@ module.exports.addItem = function(reqObj, cb) {
 module.exports.uploadFile = function(file, cb) {
   cb(null, 'file')
 }
+
+module.exports.statisticsByEventId = function(eventId, cb) {
+  Control.findAll({
+    where: {
+      event_id: eventId
+    },
+    attributes: ['control_operation', 'sample_type', 'control_number']
+  }).then((res) => {
+    cb(null, res)
+  }).catch((err) => {
+    cb(err, false)
+  })
+}
+
+module.exports.statisticsByTimeRange = function(startTime, endTime, cb) {
+  Control.findAll({
+    where: {
+      control_time: {
+        $gte: startTime,
+        $lte: endTime
+      }
+    },
+    attributes: ['control_operation', 'sample_type', 'control_number']
+  }).then((res) => {
+    cb(null, res)
+  }).catch((err) => {
+    cb(err, false)
+  })
+}

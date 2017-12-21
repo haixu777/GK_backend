@@ -192,4 +192,24 @@ Router.post('/auto_update', (req, res, next) => {
   })
 })
 
+Router.get('/statisticsByEventId', (req, res, next) => {
+  Control.statisticsByEventId(req.query.eventId, (err, data) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      data: data
+    })
+  })
+})
+
+Router.get('/statisticsByTime', (req, res, next) => {
+  Control.statisticsByTimeRange(req.query.time_start, req.query.time_end, (err, data) => {
+    if (err) throw err
+    res.json({
+      success: true,
+      data: data
+    })
+  })
+})
+
 module.exports = Router

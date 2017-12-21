@@ -28,6 +28,9 @@ module.exports.getList = function(reqObj, cb) {
     where: {
       event_id: reqObj.event_id ? reqObj.event_id : {$ne: null}
     },
+    order: [
+      ['time', 'DESC']
+    ],
     include: [
       {
         model: Events,
