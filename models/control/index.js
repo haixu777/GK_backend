@@ -26,6 +26,7 @@ const Control = db.define('control_programs', {
 })
 
 Control.belongsTo(Events)
+Events.hasMany(Control)
 
 module.exports = Control
 
@@ -245,9 +246,32 @@ module.exports.statisticsByTimeRange = function(startTime, endTime, cb) {
         $lte: endTime
       }
     },
-    attributes: ['control_operation', 'sample_type', 'control_number']
+    attributes: ['control_operation', 'sample_type', 'control_number'],
+    include: {
+      model: Events,
+      attributes: ['name', 'occurrence_time']
+    }
   }).then((res) => {
-    cb(null, res)
+    let tempEventArr = {}
+    let resObj = []
+    res.forEach((item) => {
+      tempEventArr[item.event.name] = item.event.occurrence_time
+    })
+    for (var name in tempEventArr) {
+      resObj.push({
+        name: name,
+        occurrence_time: tempEventArr[name],
+        control_programs: []
+      })
+    }
+    res.forEach((item) => {
+      resObj.forEach((res) => {
+        if (res.name == item.event.name) {
+          res.control_programs.push((item))
+        }
+      })
+    })
+    cb(null, resObj)
   }).catch((err) => {
     cb(err, false)
   })
