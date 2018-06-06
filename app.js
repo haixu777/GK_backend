@@ -16,6 +16,7 @@ const Keywords = require('./routes/keywords')
 const handleAccount = require('./routes/handleAccount')
 const Taizhang = require('./routes/taizhang')
 const Tag = require('./routes/tag')
+const Total = require('./routes/total')
 
 const app = express()
 
@@ -84,6 +85,7 @@ app.use('/keywords', Keywords)
 app.use('/handleAccount', handleAccount)
 app.use('/tag', Tag)
 app.use('/taizhang', Taizhang)
+app.use('/total', Total)
 
 const port = 3333
 
