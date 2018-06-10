@@ -35,7 +35,7 @@ module.exports.getList = function(reqObj, cb) {
       {
         model: Events,
         attributes: ['name'],
-        required: true
+        required: false
       }
     ]
   }).then((res) => {
@@ -43,6 +43,12 @@ module.exports.getList = function(reqObj, cb) {
       {},
       {
         taizhangList: res.rows.map((taizhang) => {
+          let eventName = ''
+          if (!taizhang.event) {
+            eventName = '未标注事件'
+          } else {
+            eventName = taizhang.event.name
+          }
           return Object.assign(
             {},
             {
@@ -52,7 +58,7 @@ module.exports.getList = function(reqObj, cb) {
               content: taizhang.content,
               target: taizhang.target,
               event_id: taizhang.event_id,
-              event: taizhang.event.name
+              event: eventName
             }
           )
         }),

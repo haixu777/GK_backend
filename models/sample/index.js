@@ -60,7 +60,7 @@ module.exports.getList = function(reqObj, cb) {
       // hasKeyword: 0,1,-1
       // 0: 未配置, 1: 未配置, -1: 所有
       keyword: (reqObj.hasKeyword === '') ? ({ $not: true }) : (Number(reqObj.hasKeyword) ? { $ne: '' } : ''),
-      sample_content: (reqObj.hasContent === '') ? ({ $not: true }) : (Number(reqObj.hasContent) ? { $ne: null } : null),
+      // sample_content: (reqObj.hasContent === '') ? ({ $not: true }) : (Number(reqObj.hasContent) ? { $ne: null } : null),
       publish_platform: (reqObj.hasPlatform === '') ? ({ $not: true }) : (Number(reqObj.hasPlatform) ? { $ne: '' } : null),
       user_id: (!reqObj.user_id) ? ({ $not: false }) : reqObj.user_id,
       forensic_date: reqObj.time_start ? { lte: reqObj.time_end, gte: reqObj.time_start } : { $ne: null }
@@ -69,11 +69,7 @@ module.exports.getList = function(reqObj, cb) {
       {
         model: Events,
         attributes: ['name'],
-        required: true
-      },
-      {
-        model: User,
-        attributes: ['name']
+        required: false
       }
     ],
     order: reqObj.sort_key + ' ' + reqObj.sort_order
@@ -82,6 +78,12 @@ module.exports.getList = function(reqObj, cb) {
       {},
       {
         sampleList: res.rows.map((sample) => {
+          let eventName = ''
+          if (!sample.event) {
+            eventName = '未标注事件'
+          } else {
+            eventName = sample.event.name
+          }
           return Object.assign(
             {},
             {
@@ -98,9 +100,9 @@ module.exports.getList = function(reqObj, cb) {
               sample_title: sample.sample_title,
               keyword: sample.keyword,
               url: sample.url,
-              event_name: sample.event.name,
+              event_name: eventName,
               event_id: sample.event_id,
-              operator: sample.user.name,
+              // operator: sample.user.name,
               update_time: $utils.formatTime(sample.update_time),
             }
           )
@@ -151,6 +153,20 @@ module.exports.del = function(sample_id, cb) {
     }
   }).then(() => {
     cb(null, '删除成功!')
+  }).catch((err) => {
+    cb(err, false)
+  })
+}
+
+module.exports.fetchAccountByEventId = function(id, cb) {
+  Sample.findAll({
+    attributes: ['publish_account'],
+    where: {
+      event_id: id
+    },
+    group: ['publish_account']
+  }).then((res) => {
+    cb(null, res)
   }).catch((err) => {
     cb(err, false)
   })

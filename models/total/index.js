@@ -37,7 +37,7 @@ module.exports.getAll = function(reqObj, cb) {
   db.query(sql, {
     replacements: {
       event_id: reqObj.eventId || 104,
-      time_start: reqObj.time_start || '2012-12-21',
+      time_start: reqObj.time_start || '1900-12-21',
       time_end: reqObj.time_end || '2100-12-21'
     }
   }).then((rows) => {
@@ -83,11 +83,16 @@ module.exports.getItem = function(reqObj, cb) {
   } else {
     sql = itemQuery[reqObj.key] + queryWithEventId[reqObj.key]
   }
-  db.query(sql, {
+  let pageSize = 50
+  let currentPage = reqObj.currentPage || 1
+  let pageStart = pageSize * (currentPage - 1)
+  db.query(sql+' limit :pageStart, :pageSize', {
     replacements: {
       event_id: reqObj.eventId || 104,
-      time_start: reqObj.time_start || '2012-12-21',
-      time_end: reqObj.time_end || '2100-12-21'
+      time_start: reqObj.time_start || '1900-12-21',
+      time_end: reqObj.time_end || '2100-12-21',
+      pageStart: pageStart,
+      pageSize: pageSize
     }
   }).then((rows) => {
     let str = JSON.stringify(rows)

@@ -87,7 +87,7 @@ module.exports.getList = function(conditionObj ,cb) {
       attributes: ['name'],
       where: {
       },
-      required: true
+      required: false
     },
     order: conditionObj.sort_key + ' ' + conditionObj.sort_order
   }).then((res) => {
@@ -95,6 +95,12 @@ module.exports.getList = function(conditionObj ,cb) {
       {},
       {
         controlList: res.rows.map((item) => {
+          let eventName = ''
+          if (!item.event) {
+            eventName = '未标注事件'
+          } else {
+            eventName = item.event.name
+          }
           return Object.assign(
             {},
             {
@@ -105,7 +111,7 @@ module.exports.getList = function(conditionObj ,cb) {
               control_operation: item.control_operation,
               sample_type: item.sample_type,
               control_number: item.control_number,
-              event: item.event.name,
+              event: eventName,
               event_id: item.event_id,
               verify: item.verify
             }
