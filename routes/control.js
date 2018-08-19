@@ -1,11 +1,44 @@
 const express = require('express')
 const Router = express.Router()
 const formidable = require('formidable')
+const rp = require('request-promise')
 
 const Control = require('../models/control')
 const Control_auto = require('../models/control/auto_results')
 const Events = require('../models/events')
 
+const exec = require('child_process').exec
+
+const servePath = '../../likun/bc0612/testData/2016/11/22'
+const fs = require('fs')
+const mkdirp = require('mkdirp')
+const multer = require('multer')
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    var now = new Date()
+    fs.stat(servePath, (err, stat) => {
+      if (err) {
+        mkdirp(servePath, (err) => {
+       	  if (err) {
+       	  	throw err
+       	  } else {
+       	  	cb(null, servePath+'/')
+       	  }
+        })
+      } else {
+        cb(null, servePath+'/')
+      }
+    })
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname)
+  }
+})
+var upload = multer({ storage: storage }).array('file')
+
+/**
+ * 管控记录查找
+ */
 Router.get('/fetchList', (req, res, next) => {
   let condition = Object.assign(
     {},
@@ -60,6 +93,9 @@ Router.get('/fetchEventListForControl', (req, res, next) => {
   })
 })
 
+/**
+ * 单条管控记录更改
+ */
 Router.post('/updateControl', (req, res, next) => {
   let control_item = Object.assign(
     {},
@@ -84,6 +120,9 @@ Router.post('/updateControl', (req, res, next) => {
   })
 })
 
+/**
+ * 单条管控记录删除
+ */
 Router.post('/del', (req, res, next) => {
   let control_id = req.body.id
   Control.del(control_id, (err, msg) => {
@@ -147,6 +186,9 @@ Router.post('/uploadFile', (req, res, next) => {
   })
 })
 
+/**
+ * 单条管控记录添加
+ */
 Router.post('/add', (req, res, next) => {
   let reqObj = Object.assign(
     {},
@@ -193,7 +235,7 @@ Router.post('/auto_update', (req, res, next) => {
 })
 
 Router.get('/statisticsByEventId', (req, res, next) => {
-  Control.statisticsByEventId(req.query.eventId, (err, data) => {
+  Control.statisticsByEventId(req.query, (err, data) => {
     if (err) throw err
     res.json({
       success: true,
@@ -211,5 +253,129 @@ Router.get('/statisticsByTime', (req, res, next) => {
     })
   })
 })
+
+// -------------- upload start --------------
+/**
+ * 日志文件上传
+ */
+Router.post('/upload', (req, res, next) => {
+  upload(req, res, (err) => {
+    if (err) throw err
+    let sample = Object.assign(
+      {},
+      {
+        name: req.files[0].filename,
+        path: req.files[0].path
+      }
+    )
+    console.log(req, res, err)
+    res.json({
+      success: true,
+      data: '上传成功'
+    })
+  })
+})
+
+// ------------- upload end -------------------
+
+Router.get('/extractList', (req, res, next) => {
+  exec('cd ' + servePath + ' && ls', (err,stdout,stderr) => {
+    let list = stdout.split('\n')
+    let Arr = []
+    list.forEach((item) => {
+      if (item) {
+        Arr.push({
+          name: item
+        })
+      }
+    })
+    res.json({
+      success: true,
+      data: Arr
+    })
+  })
+})
+
+Router.post('/fileDelete', (req, res, next) => [
+  exec('cd ' + servePath + ' && rm -f ' + req.body.filename, (err, stdout, stderr) => {
+    if (stderr) return stderr
+    res.json({
+      success: true,
+      msg: '文件删除成功'
+    })
+  })
+])
+
+
+// test
+/*
+console.log('day')
+rp({
+  uri: 'http://localhost:8014/month',
+  json: true
+}).then((res) => {
+  console.log(res[1].operation)
+  console.log(res.length)
+}).catch((err) => {
+  console.log(err)
+})
+
+*/
+
+// test end
+
+
+Router.post('/extract', (req, res, next) => {
+  var options = {
+    uri: 'http://localhost:8014/day?path=testData/2016/11/22',
+    json: true
+  }
+
+  rp(options)
+    .then((stdout) => {
+      //console.log(stdout)
+      //let result = JSON.parse(stdout)
+      Control.extractDateAdd(stdout, req.body.date, (err, msg) => {
+        if (err) throw err
+        exec('cd ' + servePath + ' && rm -f *.txt', (err, stdout, stderr) => {
+          if (stderr) throw err
+          res.json({
+            success: true,
+            num: msg
+          })
+        })
+      })
+    }).catch((err) => {
+      throw err
+    })
+  /*
+  exec('curl http://localhost:8012/control/extractList', (err, stdout, stderr) => {
+    let result = JSON.parse(stdout)
+    Control.extractDateAdd(result, req.body.date, (err, msg) => {
+      if (err) throw err
+      exec('cd ' + servePath + ' && rm -f *.txt', (err, stdout, stderr) => {
+        if (stderr) throw err
+        res.json({
+          success: true,
+          num: msg
+        })
+      })
+    })
+  })
+  */
+})
+
+/*
+rp(
+ {
+   uri: encodeURI('http://localhost:8014/parse?path=/root/haixu/中文.html'),
+   json: true
+  }
+).then((res) => {
+  console.log(res)
+}).catch((err) => {
+  console.log(err)
+})
+*/
 
 module.exports = Router

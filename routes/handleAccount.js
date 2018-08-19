@@ -31,6 +31,9 @@ Router.get('/actionList', (req, res, next) => {
   })
 })
 
+/**
+ * 处置账号查询
+ */
 Router.get('/list', (req, res, next) => {
   handleAccount.getList(req.query, (err, accountList) => {
     if (err) {
@@ -44,6 +47,9 @@ Router.get('/list', (req, res, next) => {
   })
 })
 
+/**
+ * 处置账号删除
+ */
 Router.post('/del', (req, res, next) => {
   handleAccount.handleDel(req.body.id, (err, msg) => {
     if (err) {
@@ -58,6 +64,9 @@ Router.post('/del', (req, res, next) => {
   })
 })
 
+/**
+ * 处置账号更新
+ */
 Router.post('/update', (req, res, next) => {
   handleAccount.handleUpdate(req.body, (err, msg) => {
     if (err) {
@@ -72,6 +81,9 @@ Router.post('/update', (req, res, next) => {
   })
 })
 
+/**
+ * 处置账号添加
+ */
 Router.post('/add', (req, res, next) => {
   handleAccount.handleAdd(req.body, (err, msg) => {
     if (err) {

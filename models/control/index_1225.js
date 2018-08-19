@@ -8,8 +8,7 @@ const Events = require('../events')
 const Control = db.define('control_programs', {
   id: {
     type: Sequelize.UUID,
-    primaryKey: true,
-    autoIncrement: true
+    primaryKey: true
   },
   control_time: Sequelize.DATE,
   control_range: Sequelize.STRING,
@@ -27,7 +26,6 @@ const Control = db.define('control_programs', {
 })
 
 Control.belongsTo(Events)
-Events.hasMany(Control)
 
 module.exports = Control
 
@@ -88,7 +86,7 @@ module.exports.getList = function(conditionObj ,cb) {
       attributes: ['name'],
       where: {
       },
-      required: false
+      required: true
     },
     order: conditionObj.sort_key + ' ' + conditionObj.sort_order
   }).then((res) => {
@@ -96,12 +94,6 @@ module.exports.getList = function(conditionObj ,cb) {
       {},
       {
         controlList: res.rows.map((item) => {
-          let eventName = ''
-          if (!item.event) {
-            eventName = '为分类事件集合'
-          } else {
-            eventName = item.event.name
-          }
           return Object.assign(
             {},
             {
@@ -112,7 +104,7 @@ module.exports.getList = function(conditionObj ,cb) {
               control_operation: item.control_operation,
               sample_type: item.sample_type,
               control_number: item.control_number,
-              event: eventName,
+              event: item.event.name,
               event_id: item.event_id,
               verify: item.verify
             }
@@ -233,88 +225,20 @@ module.exports.uploadFile = function(file, cb) {
 }
 
 
-module.exports.statisticsByEventId = function(reqObj, cb) {
-  let dynamicWhere = {}
-  let includeControl = {
-    model: Control,
-    attributes: ['control_operation', 'sample_type', 'control_number', 'control_time']
-  }
-  if (reqObj.timeStart) {
-    dynamicWhere.control_time = { $between: [reqObj.timeStart, reqObj.timeEnd] }
-    includeControl.where = dynamicWhere
-  }
-  Events.findAll({
-    where: {
-      id: reqObj.eventId
-    },
-    attributes: ['name'],
-    include:[
-      {
-        model: Events,
-        as: 'descendents',
-        attributes: ['name'],
-        hierarchy: true,
-        include: includeControl
-      },
-      {
-        ...includeControl
-      }
-    ]
-  }).then((res) => {
-    cb(null, res)
-  }).catch((err) => {
-    cb(err, false)
-  })
-  /*
+module.exports.statisticsByEventId = function(eventId, cb) {
   Control.findAll({
-    where: dynamicWhere,
-    attributes: ['control_operation', 'sample_type', 'control_number', 'control_time']
+    where: {
+      event_id: eventId
+    },
+    attributes: ['control_operation', 'sample_type', 'control_number']
   }).then((res) => {
     cb(null, res)
   }).catch((err) => {
     cb(err, false)
   })
-  */
 }
 
 module.exports.statisticsByTimeRange = function(startTime, endTime, cb) {
-  Control.findAll({
-    where: {
-      control_time: {
-        $gte: startTime,
-        $lte: endTime
-      }
-    },
-    attributes: ['control_operation', 'sample_type', 'control_number'],
-    include: {
-      model: Events,
-      attributes: ['name', 'occurrence_time']
-    }
-  }).then((res) => {
-    let tempEventArr = {}
-    let resObj = []
-    res.forEach((item) => {
-      tempEventArr[item.event.name] = item.event.occurrence_time
-    })
-    for (var name in tempEventArr) {
-      resObj.push({
-        name: name,
-        occurrence_time: tempEventArr[name],
-        control_programs: []
-      })
-    }
-    res.forEach((item) => {
-      resObj.forEach((res) => {
-        if (res.name == item.event.name) {
-          res.control_programs.push((item))
-        }
-      })
-    })
-    cb(null, resObj)
-  }).catch((err) => {
-    cb(err, false)
-  })
-  /*
   Control.findAll({
     where: {
       control_time: {
@@ -328,44 +252,4 @@ module.exports.statisticsByTimeRange = function(startTime, endTime, cb) {
   }).catch((err) => {
     cb(err, false)
   })
-  */
-}
-
-
-function createItem (item, day) {
-  return Control.create({
-    control_time: day,
-    control_range: item.GKarea,
-    control_operation: item.operation,
-    control_descript: item.content,
-    control_number: Number(item.num),
-    sample_type: item.type,
-    event_id: 272,
-    auto_id: 0,
-    verify: 0
-  })
-}
-
-module.exports.extractDateAdd = function(dataList, day, cb) {
-  let hasResult = JSON.stringify(dataList) !== '[]'
-  //console.log(dataList[0])
- // let json = JSON.parse(dataList)
-  //console.log(dataList.substring(7650, 7740))
- // console.log(dataList)
-  if (hasResult) {
-    promise = []
-    dataList.forEach((item) => {
-      if (item.GKarea != '' || item.content != '') { // 管控范围和管控内容都为空的时候不录入
-        promise.push(createItem(item, day))
-      }
-    })
-    Sequelize.Promise.all(promise)
-      .then((res) => {
-        cb(null, promise.length)
-      }).catch((err) => {
-        cb(err, false)
-      })
-  } else {
-    cb(null, 0)
-  }
 }

@@ -2,6 +2,7 @@ const Sequelize = require('sequelize')
 const db = require('../../config/database')
 const $utils = require('../../utils')
 const exec = require('child_process').exec
+const rp = require('request-promise')
 
 const Sample_auto = db.define('samples_auto', {
   id: {
@@ -95,7 +96,7 @@ module.exports.extra = function(id, cb) {
     .then((sample) => {
       let fileType = sample.name.split('.').pop()
       if (fileType == 'png' || fileType == 'jpg' || fileType == 'jepg') {
-        exec(`cd extra_app/ && python img2text.py ${sample.path}`, (err, msg) => {
+        exec(`cd extra_app/ && python img2text.py ../../../../${sample.path}`, (err, msg) => {
           if (err) {
             cb(err, false)
           } else {
@@ -103,16 +104,27 @@ module.exports.extra = function(id, cb) {
           }
         })
       } else if (fileType == 'pdf') {
-        exec(`cd extra_app/ && python pdf2text.py ${sample.path} ${sample.name}`, (err, msg) => {
+        exec(`cd extra_app/ && python pdf2text.py ../../../../${sample.path} ${sample.name}`, (err, msg) => {
           if (err) {
             cb(err, false)
           } else {
             cb(null, msg)
           }
         })
+      } else if (fileType == 'html') {
+        let url = 'http://localhost:8014/parse?path=/'+sample.path
+        rp({
+          uri: encodeURI(url),
+          json: true
+        }).then((res) => {
+          cb(null, res)
+        }).catch((err) => {
+          console.log(err)
+          cb(err, false)
+        }) 
       } else {
-        cb(null, '抽取结束!')
-      }
+		cb(null, '抽取结束!')
+        }
     }).catch((err) => {
       cb(err, false)
     })

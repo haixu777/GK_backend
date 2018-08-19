@@ -18,6 +18,8 @@
     "jsonwebtoken": "*",
     "passport": "*",
     "passport-jwt": "*",
+    "request": "^2.87.0",
+    "request-promise": "^4.2.2",
     "sequelize": "*",
     "sequelize-hierarchy": "^1.2.0"
   },

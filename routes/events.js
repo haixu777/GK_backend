@@ -46,6 +46,9 @@ Router.post('/addEvent', (req, res, next) => {
 })
 */
 
+/**
+ * 事件增加 or 事件更新
+ */
 Router.post('/update', (req, res, next) => {
   const newEvent = {
     id: req.body.id,
@@ -71,6 +74,9 @@ Router.post('/update', (req, res, next) => {
   })
 })
 
+/**
+ * 事件树获取
+ */
 Router.get('/tree', (req, res, next) => {
   Events.getTree((err, tree) => {
     if (err) throw err
@@ -80,6 +86,9 @@ Router.get('/tree', (req, res, next) => {
   })
 })
 
+/**
+ * 事件删除
+ */
 Router.post('/del', (req, res, next) => {
   Events.delEvents(req.body.id, (err, msg) => {
     if (err) throw err
@@ -101,6 +110,9 @@ Router.get('/list', (req, res, next) => {
   })
 })
 
+/**
+ * 管控记录获取
+ */
 Router.get('/fetchEventControl', (req, res, next) => {
   let eventId = req.query.id
   Control.getControlByEvent(eventId, (err, controlList) => {
@@ -112,6 +124,9 @@ Router.get('/fetchEventControl', (req, res, next) => {
   })
 })
 
+/**
+ * 有害样本获取
+ */
 Router.get('/fetchEventSample', (req, res, next) => {
   let eventId = req.query.id
   Sample.getSampleByEvent(eventId, (err, sampleList) => {
@@ -126,9 +141,7 @@ Router.get('/fetchEventSample', (req, res, next) => {
 Router.get('/fetchEventByMonth', (req, res, next) => {
   let queryObj = {
     recurrence: Number(req.query.recurrence),
-    view: Number(req.query.view),
-    tag_id: req.query.tag_id,
-    user_id: req.query.user_id
+    view: Number(req.query.view)
   }
   Events.getEventByMonth(queryObj, (err, eventsList) => {
     if (err) throw err
@@ -162,7 +175,7 @@ Router.get('/timeline', (req, res, next) => {
 
 Router.get('/notice', (req, res, next) => {
   let now = new Date()
-  Events.getNotice(now, req.query.dept_name, (err, noticeList) => {
+  Events.getNotice(now, (err, noticeList) => {
     if (err) throw err
     res.json({
       success: true,
@@ -171,8 +184,22 @@ Router.get('/notice', (req, res, next) => {
   })
 })
 
+/**
+ * 关键词获取
+ */
 Router.get('/fetchkeywords', (req, res, next) => {
   let eventId = req.query.eventId
+  Sample.fetchKeywordByEventId(eventId, (err, keywordsList) => {
+    if (err) {
+      throw err
+      return
+    }
+    res.json({
+      success: true,
+      keywordsList: keywordsList
+    })
+  })
+  /*
   Keywords.fetchByEventId(eventId, (err, keywordsList) => {
     if (err) throw err
     res.json({
@@ -180,8 +207,12 @@ Router.get('/fetchkeywords', (req, res, next) => {
       keywordsList: keywordsList
     })
   })
+  */
 })
 
+/**
+ * 人物获取
+ */
 Router.get('/fetchPersons', (req, res, next) => {
   Persons.fetchByEventId(req.query.eventId, (err, personList) => {
     if (err) throw err
@@ -192,6 +223,9 @@ Router.get('/fetchPersons', (req, res, next) => {
   })
 })
 
+/**
+ * 平台获取
+ */
 Router.get('/fetchPlatform', (req, res, next) => {
   Platform.fetchByEventId(req.query.eventId, (err, platformList) => {
     if (err) throw err
@@ -202,6 +236,9 @@ Router.get('/fetchPlatform', (req, res, next) => {
   })
 })
 
+/**
+ * 账号获取
+ */
 Router.get('/fetchAccount', (req, res, next) => {
   /*
   Account.fetchByEventId(req.query.eventId, (err, accountList) => {
@@ -221,6 +258,9 @@ Router.get('/fetchAccount', (req, res, next) => {
   })
 })
 
+/**
+ * 群体获取
+ */
 Router.get('/fetchGroup', (req, res, next) => {
   Group.fetchByEventId(req.query.eventId, (err, groupList) => {
     if (err) throw err
@@ -231,6 +271,9 @@ Router.get('/fetchGroup', (req, res, next) => {
   })
 })
 
+/**
+ * 事件流程图上传
+ */
 Router.post('/process_upload', (req, res, next) => {
   upload(req, res, (err) => {
     if (err) throw err
@@ -262,6 +305,9 @@ Router.get('/process_image', (req, res, next) => {
   })
 })
 
+/**
+ * 事件流程图删除
+ */
 Router.post('/process_image/del', (req, res, next) => {
   var imagePath = 'process_image/' + req.body.eventId + '.jpg'
   fs.exists(imagePath, (isExists) => {

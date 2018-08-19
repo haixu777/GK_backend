@@ -45,7 +45,7 @@ module.exports.getList = function(reqObj, cb) {
         taizhangList: res.rows.map((taizhang) => {
           let eventName = ''
           if (!taizhang.event) {
-            eventName = '未标注事件'
+            eventName = '未分类事件集合'
           } else {
             eventName = taizhang.event.name
           }

@@ -52,10 +52,10 @@ module.exports.getAll = function(reqObj, cb) {
 
 let itemQuery = {
   keyword: 'select distinct a.keyword, b.name from samples a left join events b on a.event_id = b.id where a.keyword != "" and (a.forensic_date between :time_start and :time_end)',
-  sample: 'select a.sample_title, a.sample_content, b.name from samples a left join events b on a.event_id = b.id where (a.forensic_date between :time_start and :time_end)',
-  account: 'select distinct a.publish_account, b.name from samples a left join events b on a.event_id = b.id where a.publish_account != "" and (a.forensic_date between :time_start and :time_end)',
+  sample: 'select a.sample_title, a.sample_content, a.sample_format,  b.name from samples a left join events b on a.event_id = b.id where (a.forensic_date between :time_start and :time_end)',
+  account: 'select distinct a.publish_account, a.publish_platform, b.name from samples a left join events b on a.event_id = b.id where a.publish_account != "" and (a.forensic_date between :time_start and :time_end)',
   person: 'select distinct name from persons',
-  website: 'select distinct a.publish_platform, b.name from samples a left join events b on a.event_id = b.id where a.publish_platform != "" and (a.forensic_date between :time_start and :time_end)',
+  website: 'select distinct a.publish_platform  from samples a left join events b on a.event_id = b.id where a.publish_platform != "" and (a.forensic_date between :time_start and :time_end)',
   group: 'select distinct name from `group`',
   events: 'select name from events where type = 1 and (occurrence_time between :time_start and :time_end)',
   anli: 'select name from events where type = 1 and (occurrence_time between :time_start and :time_end)',
