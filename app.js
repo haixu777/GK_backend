@@ -16,6 +16,7 @@ const Keywords = require('./routes/keywords')
 const handleAccount = require('./routes/handleAccount')
 const User_wxb = require('./routes/user_wxb')
 const Taizhang = require('./routes/taizhang')
+const Tag = require('./routes/tag')
 const Total = require('./routes/total')
 
 const app = express()
@@ -42,7 +43,7 @@ app.post('/login', urlencodedParser, (req, res, next) => {
   // 8hours
   //res.cookie('ticket', ticket, { expires: new Date(Date.now() + 8*60*60*1000), httpOnly: false })
   res.cookie('ticket', escape(ticket), { expires: new Date(Date.now() + 8*60*60*1000) })
-  res.redirect('http://10.136.88.96:3333/home')
+  res.redirect('http://10.136.88.96:3000/calendar')
 })
 
 /*
@@ -123,9 +124,10 @@ app.use('/keywords', Keywords)
 app.use('/handleAccount', handleAccount)
 app.use('/user_wxb', User_wxb)
 app.use('/taizhang', Taizhang)
+app.use('/tag', Tag)
 app.use('/total', Total)
 
-const port = 3333
+const port = 3000
 
 app.listen(port, () => {
   console.log('server started at port: ' + port)
