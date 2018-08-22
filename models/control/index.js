@@ -254,10 +254,17 @@ module.exports.statisticsByEventId = function(reqObj, cb) {
         as: 'descendents',
         attributes: ['name'],
         hierarchy: true,
-        include: includeControl
+        include: {
+          model: includeControl.model,
+          attributes: includeControl.attributes
+          // where: includeControl.where
+        }
       },
       {
-        ...includeControl
+        // ...includeControl
+        model: includeControl.model,
+        attributes: includeControl.attributes,
+        where: includeControl.where
       }
     ]
   }).then((res) => {
